@@ -17,5 +17,11 @@ class DatabaseSeeder extends Seeder
         foreach (\App\Enums\Roles::cases() as $role) {
             Role::firstOrCreate(['name' => $role->value]);
         }
+
+        User::create([
+            'name' => 'User',
+            'email' => 'user@mail.com',
+            'password' => bcrypt('password'),
+        ]);
     }
 }
