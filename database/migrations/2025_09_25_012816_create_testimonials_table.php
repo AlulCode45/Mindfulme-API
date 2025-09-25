@@ -13,7 +13,7 @@ return new class extends Migration {
     {
         Schema::create('testimonials', function (Blueprint $table) {
             $table->uuid('testimonial_id')->primary();
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained('users', 'uuid')->onDelete('cascade');
             $table->text('content');
             $table->enum('status', TestimonialApprovalStatus::cases())->default(TestimonialApprovalStatus::PENDING);
             $table->timestamps();

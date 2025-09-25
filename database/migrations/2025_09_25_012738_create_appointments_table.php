@@ -13,9 +13,9 @@ return new class extends Migration {
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->uuid('appointment_id')->primary();
-            $table->foreignUuid('complaint_id')->constrained('complaints')->onDelete('cascade');
-            $table->foreignUuid('psychologist_id')->constrained('users')->onDelete('cascade');
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('complaint_id')->constrained('complaints', 'complaint_id')->onDelete('cascade');
+            $table->foreignUuid('psychologist_id')->constrained('users', 'uuid')->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained('users', 'uuid')->onDelete('cascade');
             $table->dateTime('start_time');
             $table->dateTime('end_time')->nullable();
             $table->enum('status', AppointmentStatus::cases())->default(AppointmentStatus::SCHEDULED);

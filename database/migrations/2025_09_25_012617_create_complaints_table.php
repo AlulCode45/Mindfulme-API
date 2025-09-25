@@ -13,7 +13,7 @@ return new class extends Migration {
     {
         Schema::create('complaints', function (Blueprint $table) {
             $table->uuid('complaint_id')->primary();
-            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('user_id')->constrained('users', 'uuid')->onDelete('cascade');
             $table->string('title');
             $table->longText('chronology');
             $table->string('category');

@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('articles', function (Blueprint $table) {
             $table->uuid('article_id')->primary();
-            $table->foreignUuid('author_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('author_id')->constrained('users', 'uuid')->onDelete('cascade');
             $table->string('title');
             $table->longText('content');
             $table->timestamps();

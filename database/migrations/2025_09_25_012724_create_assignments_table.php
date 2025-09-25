@@ -12,8 +12,8 @@ return new class extends Migration {
     {
         Schema::create('assignments', function (Blueprint $table) {
             $table->uuid('assignment_id')->primary();
-            $table->foreignUuid('complaint_id')->constrained('complaints')->onDelete('cascade');
-            $table->foreignUuid('psychologist_id')->constrained('users')->onDelete('cascade');
+            $table->foreignUuid('complaint_id')->constrained('complaints', 'complaint_id')->onDelete('cascade');
+            $table->foreignUuid('psychologist_id')->constrained('users', 'uuid')->onDelete('cascade');
             $table->timestamps();
         });
     }
