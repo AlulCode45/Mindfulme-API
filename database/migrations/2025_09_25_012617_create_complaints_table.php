@@ -1,18 +1,23 @@
 <?php
 
+use App\Enums\ComplaintStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
     public function up(): void
     {
         Schema::create('complaints', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('complaint_id')->primary();
+            $table->foreignUuid('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('title');
+            $table->longText('chronology');
+            $table->string('category');
+            $table->enum('status', ComplaintStatus::cases())->default(ComplaintStatus::NEW);
             $table->timestamps();
         });
     }
