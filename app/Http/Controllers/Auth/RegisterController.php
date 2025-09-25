@@ -9,10 +9,6 @@ use Illuminate\Http\Request;
 
 class RegisterController extends Controller
 {
-    public function registerForm()
-    {
-        return view('auth.register');
-    }
     public function register(RegisterRequest $request)
     {
         $createUser = User::create([

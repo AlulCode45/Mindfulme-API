@@ -9,10 +9,6 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    public function loginForm()
-    {
-        return view('auth.login');
-    }
     public function login(LoginRequest $request)
     {
         $credentials = $request->only('email', 'password');
@@ -22,9 +18,5 @@ class LoginController extends Controller
 
             return redirect()->intended('/dashboard');
         }
-
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->onlyInput('email');
     }
 }

@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Password;
 
 class ForgotPassword extends Controller
 {
-    public function forgotPassword()
-    {
-        return view('auth.forgot-password');
-    }
-
     public function sendEmailResetPassword(Request $request)
     {
         $request->validate(['email' => 'required|email']);
