@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum TestimonialApprovalStatus
+enum TestimonialApprovalStatus: string
 {
     case PENDING = "pending";
     case APPROVED = "approved";

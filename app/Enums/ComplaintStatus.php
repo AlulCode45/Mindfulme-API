@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum ComplaintStatus
+enum ComplaintStatus: string
 {
     case NEW = 'new';
     case IN_REVIEW = 'in_review';
