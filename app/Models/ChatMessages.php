@@ -12,7 +12,14 @@ class ChatMessages extends Model
     use HasFactory, HasUuids;
 
     public $incrementing = false;
-    protected $primaryKey = 'uuid';
+    protected $primaryKey = 'chat_message_id';
     protected $keyType = 'string';
     protected $guarded = [''];
+
+    protected static function booted(): void
+    {
+        static::creating(function (ChatMessages $chatMessage) {
+            $chatMessage->chat_message_id = (string) \Illuminate\Support\Str::uuid();
+        });
+    }
 }

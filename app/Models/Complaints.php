@@ -13,7 +13,7 @@ class Complaints extends Model
     use HasUuids, HasFactory;
 
     public $incrementing = false;
-    protected $primaryKey = 'uuid';
+    protected $primaryKey = 'complaint_id';
     protected $keyType = 'string';
     protected $guarded = [''];
     public $timestamps = false;
@@ -21,4 +21,11 @@ class Complaints extends Model
     protected $casts = [
         'status' => ComplaintStatus::class,
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Complaints $complaint) {
+            $complaint->complaint_id = (string) \Illuminate\Support\Str::uuid();
+        });
+    }
 }

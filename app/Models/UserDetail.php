@@ -10,8 +10,16 @@ class UserDetail extends Model
     use HasUuids;
 
     public $incrementing = false;
-    protected $primaryKey = 'uuid';
+    protected $primaryKey = 'user_detail_id';
     protected $keyType = 'string';
     protected $guarded = [''];
     public $timestamps = false;
+
+
+    protected static function booted(): void
+    {
+        static::creating(function (UserDetail $userDetail) {
+            $userDetail->user_detail_id = (string) \Illuminate\Support\Str::uuid();
+        });
+    }
 }

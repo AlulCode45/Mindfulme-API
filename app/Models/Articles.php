@@ -12,7 +12,14 @@ class Articles extends Model
     use HasFactory, HasUuids;
 
     public $incrementing = false;
-    protected $primaryKey = 'uuid';
+    protected $primaryKey = 'article_id';
     protected $keyType = 'string';
     protected $guarded = [''];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Articles $article) {
+            $userDetail->user_detail_id = (string) \Illuminate\Support\Str::uuid();
+        });
+    }
 }
