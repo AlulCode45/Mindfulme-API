@@ -19,7 +19,7 @@ class Articles extends Model
     protected static function booted(): void
     {
         static::creating(function (Articles $article) {
-            $userDetail->user_detail_id = (string) \Illuminate\Support\Str::uuid();
+            $article->article_id = (string) \Illuminate\Support\Str::uuid();
         });
     }
 }
