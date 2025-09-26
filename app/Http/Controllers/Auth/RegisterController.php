@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Models\UserDetail;
 
 class RegisterController extends Controller
 {
@@ -17,9 +18,19 @@ class RegisterController extends Controller
             'password' => bcrypt($request->password),
         ]);
         if ($createUser) {
-            return redirect('/login')->with('success', 'Registration successful. Please login.');
+            UserDetail::create([
+                'user_id' => $createUser->uuid,
+                'phone' => $request->phone,
+                'address' => $request->address,
+                'date_of_birth' => $request->date_of_birth,
+                'bio' => $request->bio,
+            ]);
+            return ResponseHelper::success([
+                'user' => $createUser,
+                'token' => $createUser->createToken('auth_token')->plainTextToken,
+            ], 'Registration successful. Please login.');
         } else {
-            return back()->withErrors(['registration' => 'Registration failed. Please try again.'])->withInput();
+            return ResponseHelper::error('Registration failed. Please try again.', 400);
         }
     }
 }
