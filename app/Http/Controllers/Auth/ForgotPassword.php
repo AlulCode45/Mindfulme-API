@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Str;
 
 class ForgotPassword extends Controller
 {
@@ -17,14 +21,13 @@ class ForgotPassword extends Controller
             $request->only('email')
         );
 
-        return $status === Password::ResetLinkSent
-            ? back()->with(['status' => __($status)])
-            : back()->withErrors(['email' => __($status)]);
-    }
-
-    public function formResetPassword($token)
-    {
-        return view('auth.reset-password', ['token' => $token]);
+        if ($status === Password::ResetLinkSent) {
+            return ResponseHelper::success([
+                'status' => $status,
+            ], __($status) . ' Please check your email for the password reset link.');
+        } else {
+            return ResponseHelper::error('Failed to send password reset link.', 400);
+        }
     }
 
     public function resetPassword(Request $request, $token)
@@ -48,8 +51,10 @@ class ForgotPassword extends Controller
             }
         );
 
-        return $status === Password::PasswordReset
-            ? redirect()->route('login')->with('status', __($status))
-            : back()->withErrors(['email' => [__($status)]]);
+        if ($status === Password::PasswordReset) {
+            return ResponseHelper::success([], 'Password reset successful. You can now log in with your new password.');
+        } else {
+            return ResponseHelper::error(__($status), 400);
+        }
     }
 }

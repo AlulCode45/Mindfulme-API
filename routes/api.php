@@ -1,9 +1,11 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Auth\ForgotPassword;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use Illuminate\Support\Facades\Route;
 
-// Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login']);
-// Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register']);
-// Route::post('forgot-password', [\App\Http\Controllers\AuthController::class, 'forgotPassword']);
-// Route::post('reset-password', [\App\Http\Controllers\AuthController::class, 'resetPassword']);
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/register', [RegisterController::class, 'register']);
+Route::post('forgot-password', [ForgotPassword::class, 'sendEmailResetPassword']);
+Route::post('reset-password', [ForgotPassword::class, 'resetPassword']);

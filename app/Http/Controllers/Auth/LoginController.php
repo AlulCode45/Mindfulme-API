@@ -2,21 +2,26 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use Illuminate\Http\Request;
+use App\Models\User;
+use Hash;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        $credentials = $request->only('email', 'password');
+        $user = User::where('email', $request->email)->first();
+        if ($user and Hash::check($request->password, $user->password)) {
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-
-            return redirect()->intended('/dashboard');
+            return ResponseHelper::success([
+                'user' => $user,
+                'token' => $user->createToken('auth_token')->plainTextToken,
+            ], 'Login successful');
         }
+
+        return ResponseHelper::error('Login failed', 401);
     }
 }
