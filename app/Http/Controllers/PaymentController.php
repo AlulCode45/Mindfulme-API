@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payments;
@@ -19,7 +19,7 @@ class PaymentController extends Controller
 
         // Simpan dulu ke DB (status pending)
         $payment = Payments::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $request->user()->uuid,
             'order_id' => $orderId,
             'gross_amount' => $request->gross_amount,
             'transaction_status' => 'pending',

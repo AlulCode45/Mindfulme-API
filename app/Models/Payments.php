@@ -2,9 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\PaymentType;
-use App\Enums\TransactionStatus;
-use App\Enums\FraudStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -33,8 +30,8 @@ class Payments extends Model
         'payment_details' => 'array',
         'transaction_time' => 'datetime',
         'expiry_time' => 'datetime',
-        'payment_type' => PaymentType::class,
-        'transaction_status' => TransactionStatus::class,
-        'fraud_status' => FraudStatus::class,
+        'payment_type' => \App\Enum\Payments\PaymentType::class,
+        'transaction_status' => \App\Enums\Payments\TransactionStatus::class,
+        'fraud_status' => \App\Enums\Payments\FraudStatus::class,
     ];
 }
