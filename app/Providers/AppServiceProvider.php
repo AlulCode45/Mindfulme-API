@@ -2,17 +2,26 @@
 
 namespace App\Providers;
 
+use App\Contracts\Interfaces\BundlePackageInterface;
+use App\Contracts\Repositories\BundlePackageRepository;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+
+    private array $register = [
+        BundlePackageInterface::class => BundlePackageRepository::class,
+    ];
+
     /**
      * Register any application services.
      */
     public function register(): void
     {
-        //
+        foreach ($this->register as $key => $value) {
+            $this->app->bind($key, $value);
+        }
     }
 
     /**

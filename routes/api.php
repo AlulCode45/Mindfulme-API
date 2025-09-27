@@ -19,3 +19,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/midtrans/snap', [PaymentController::class, 'createSnapToken']);
 });
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle']);
+
+Route::apiResource('bundle-packages', \App\Http\Controllers\BundlePackage\BundlePackagesController::class);
