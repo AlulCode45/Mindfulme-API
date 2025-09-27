@@ -7,5 +7,5 @@ use Illuminate\Database\Eloquent\Model;
 
 interface UpdateInterface
 {
-    public function update(array $data): bool|Model|Collection|array;
+    public function update(array $data, string $uuid): bool|Model|Collection|array;
 }
