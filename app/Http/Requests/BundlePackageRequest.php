@@ -23,7 +23,9 @@ class BundlePackageRequest extends FormRequest
     {
         $bundleId = $this->route('bundle_package');
         return [
-            'package_name' => 'required|string|max:255|unique:bundle_packages,package_name,' . $bundleId . ',bundle_id',
+            'package_name' => $this->isMethod('post')
+                ? 'required|string|max:255|unique:bundle_packages,package_name'
+                : 'required|string|max:255|unique:bundle_packages,package_name,' . $bundleId . ',bundle_id',
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'points' => 'required|integer|min:0',
