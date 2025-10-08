@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Contracts\Interfaces\BundlePackageInterface;
+use App\Contracts\Interfaces\UserBundlePointInterface;
 use App\Contracts\Repositories\BundlePackageRepository;
+use App\Contracts\Repositories\UserBundlePointRepository;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,6 +14,7 @@ class AppServiceProvider extends ServiceProvider
 
     private array $register = [
         BundlePackageInterface::class => BundlePackageRepository::class,
+        UserBundlePointInterface::class => UserBundlePointRepository::class,
     ];
 
     /**

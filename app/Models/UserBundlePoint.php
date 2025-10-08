@@ -13,6 +13,7 @@ class UserBundlePoint extends Model
     protected $primaryKey = 'user_bundle_id';
     protected $keyType = 'string';
     protected $guarded = [''];
+    public $timestamps = false;
 
     protected static function booted(): void
     {
