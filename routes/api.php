@@ -36,5 +36,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{uuid}', [\App\Http\Controllers\ComplaintController::class, 'destroy']);
     });
 
+    Route::prefix('ai-discussion')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AIDiscussionController::class, 'get']);
+        Route::get('/user/{uuid}', [\App\Http\Controllers\AIDiscussionController::class, 'getConversationsByUserUuid']);
+        Route::get('/detail/{uuid}', [\App\Http\Controllers\AIDiscussionController::class, 'getConversationsByUuid']);
+        Route::delete('/{uuid}', [\App\Http\Controllers\AIDiscussionController::class, 'deleteConversation']);
+        Route::post('/save-conversation', [\App\Http\Controllers\AIDiscussionController::class, 'saveConversation']);
+        Route::post('/send-to-complaint/{uuid}', [\App\Http\Controllers\AIDiscussionController::class, 'sendConversationToComplaint']);
+    });
 });
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle']);
