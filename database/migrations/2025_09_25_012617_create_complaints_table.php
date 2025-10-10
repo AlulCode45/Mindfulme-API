@@ -13,6 +13,7 @@ return new class extends Migration {
     {
         Schema::create('complaints', function (Blueprint $table) {
             $table->uuid('complaint_id')->primary();
+            $table->foreignUuid('ai_discussion_id')->nullable()->constrained('ai_discussions', 'ai_discussion_id')->onDelete('set null');
             $table->foreignUuid('user_id')->constrained('users', 'uuid')->onDelete('cascade');
             $table->string('title');
             $table->longText('chronology');
