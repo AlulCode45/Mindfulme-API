@@ -16,7 +16,6 @@ class Complaints extends Model
     protected $primaryKey = 'complaint_id';
     protected $keyType = 'string';
     protected $guarded = [''];
-    public $timestamps = false;
 
     protected $casts = [
         'status' => ComplaintStatus::class,
