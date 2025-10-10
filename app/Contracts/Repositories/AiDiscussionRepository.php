@@ -7,6 +7,7 @@ use App\Contracts\Interfaces\AiDiscussionInterface;
 use App\Models\AiDiscussion;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection as SupportCollection;
 
 class AiDiscussionRepository extends BaseRepository implements AiDiscussionInterface
 {
@@ -17,9 +18,23 @@ class AiDiscussionRepository extends BaseRepository implements AiDiscussionInter
     /**
      * @inheritDoc
      */
-    public function get(): array|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection
+    public function get(): array|Model|Collection|SupportCollection
     {
-        return $this->model->all();
+        return $this->model->all()
+            ->groupBy('user_id')
+            ->map(function ($items, $userId) {
+                return $items->map(function ($item) {
+                    return [
+                        'ai_discussion_id' => $item->ai_discussion_id,
+                        'user_id' => $item->user_id,
+                        'conversation' => $item->conversation,
+                        'identified_issue' => $item->identified_issue,
+                        'summary' => $item->summary,
+                        'created_at' => $item->created_at,
+                        'updated_at' => $item->updated_at,
+                    ];
+                });
+            });
     }
 
     /**
