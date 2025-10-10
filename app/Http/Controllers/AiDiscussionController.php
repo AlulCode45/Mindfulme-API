@@ -4,18 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Contracts\Interfaces\AiDiscussionInterface;
 use App\Contracts\Interfaces\ComplaintInterface;
+use App\Contracts\Interfaces\EvidenceInterface;
 use App\Enums\ComplaintStatus;
 use App\Helpers\ResponseHelper;
+use App\Http\Requests\SendConversationToComplaintRequest;
+use App\Traits\UploadFile;
 use Illuminate\Http\Request;
 
 class AiDiscussionController extends Controller
 {
+    use UploadFile;
     private AiDiscussionInterface $aiDiscussion;
     private ComplaintInterface $complaint;
-    public function __construct(AiDiscussionInterface $aiDiscussion, ComplaintInterface $complaint)
+    private EvidenceInterface $evidence;
+    public function __construct(AiDiscussionInterface $aiDiscussion, ComplaintInterface $complaint, EvidenceInterface $evidence)
     {
         $this->aiDiscussion = $aiDiscussion;
         $this->complaint = $complaint;
+        $this->evidence = $evidence;
     }
 
     public function get()
@@ -64,12 +70,13 @@ class AiDiscussionController extends Controller
             return ResponseHelper::error($e->getMessage(), 500);
         }
     }
-    public function sendConversationToComplaint(string $uuid)
+    public function sendConversationToComplaint(string $uuid, SendConversationToComplaintRequest $request)
     {
         $conversation = $this->aiDiscussion->show($uuid);
         if (!$conversation) {
             return ResponseHelper::error('Conversation not found', 404);
         }
+
         $data = [
             'user_id' => $conversation->user_id,
             'title' => $conversation->identified_issue ?? 'No title',
@@ -79,8 +86,26 @@ class AiDiscussionController extends Controller
             'status' => ComplaintStatus::NEW ,
         ];
         try {
-            $this->complaint->store($data);
-            return ResponseHelper::success($data, 'Complaint created successfully');
+            $complaint = $this->complaint->store($data);
+            // Implementation Evidence handling
+            if ($request->hasFile('evidence')) {
+                $files = $request->file('evidence');
+                $evidenceData = [];
+                foreach ($files as $file) {
+                    $filePath = $this->uploadFile($file, directory: 'complaint_evidences');
+                    $evidenceData[] = [
+                        'evidence_id' => (string) \Illuminate\Support\Str::uuid(),
+                        'complaint_id' => $complaint->complaint_id,
+                        'file_path' => $filePath,
+                        'file_type' => $file->getClientMimeType(),
+                    ];
+                }
+                $this->evidence->multipleStore($evidenceData);
+            }
+            return ResponseHelper::success([
+                ...$data,
+                'evidences' => $evidenceData ?? []
+            ], 'Complaint created successfully');
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage(), 500);
         }

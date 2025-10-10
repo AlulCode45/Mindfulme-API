@@ -5,10 +5,12 @@ namespace App\Providers;
 use App\Contracts\Interfaces\AiDiscussionInterface;
 use App\Contracts\Interfaces\BundlePackageInterface;
 use App\Contracts\Interfaces\ComplaintInterface;
+use App\Contracts\Interfaces\EvidenceInterface;
 use App\Contracts\Interfaces\UserBundlePointInterface;
 use App\Contracts\Repositories\AiDiscussionRepository;
 use App\Contracts\Repositories\BundlePackageRepository;
 use App\Contracts\Repositories\ComplaintRepository;
+use App\Contracts\Repositories\EvidenceRepository;
 use App\Contracts\Repositories\UserBundlePointRepository;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -20,7 +22,8 @@ class AppServiceProvider extends ServiceProvider
         BundlePackageInterface::class => BundlePackageRepository::class,
         UserBundlePointInterface::class => UserBundlePointRepository::class,
         ComplaintInterface::class => ComplaintRepository::class,
-        AiDiscussionInterface::class => AiDiscussionRepository::class
+        AiDiscussionInterface::class => AiDiscussionRepository::class,
+        EvidenceInterface::class => EvidenceRepository::class,
     ];
 
     /**
