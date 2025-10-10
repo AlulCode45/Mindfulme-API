@@ -19,7 +19,10 @@ class ComplaintRepository extends BaseRepository implements ComplaintInterface
      */
     public function get(): array|\Illuminate\Database\Eloquent\Model|\Illuminate\Database\Eloquent\Collection
     {
-        return $this->model->all();
+        return $this->model
+            ->query()
+            ->with('evidence')
+            ->get();
     }
 
     /**
@@ -51,7 +54,10 @@ class ComplaintRepository extends BaseRepository implements ComplaintInterface
      */
     public function show(string $uuid): \Illuminate\Database\Eloquent\Model|array|\Illuminate\Database\Eloquent\Collection
     {
-        return $this->model->findOrFail($uuid);
+        return $this->model
+            ->query()
+            ->with('evidence')
+            ->findOrFail($uuid);
     }
 
     public function getByUserUuid(string $uuid): array|Collection|Model

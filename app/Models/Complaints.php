@@ -6,6 +6,7 @@ use App\Enums\ComplaintStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Complaints extends Model
 {
@@ -20,6 +21,11 @@ class Complaints extends Model
     protected $casts = [
         'status' => ComplaintStatus::class,
     ];
+
+    public function evidence(): HasMany
+    {
+        return $this->hasMany(Evidence::class, 'complaint_id', 'complaint_id');
+    }
 
     protected static function booted(): void
     {
