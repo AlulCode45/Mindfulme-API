@@ -7,6 +7,7 @@ use App\Contracts\Interfaces\ComplaintInterface;
 use App\Contracts\Interfaces\EvidenceInterface;
 use App\Enums\ComplaintStatus;
 use App\Helpers\ResponseHelper;
+use App\Http\Requests\SaveConversationRequest;
 use App\Http\Requests\SendConversationToComplaintRequest;
 use App\Traits\UploadFile;
 use Illuminate\Http\Request;
@@ -29,8 +30,24 @@ class AiDiscussionController extends Controller
         return ResponseHelper::success($this->aiDiscussion->get(), 'Conversations retrieved successfully');
     }
 
-    public function saveConversation(Request $request)
+    public function saveConversation(SaveConversationRequest $request)
     {
+        // When Request Have ai_discussion_id, Update the Conversation
+        if ($request->ai_discussion_id) {
+            try {
+                $data = [
+                    'conversation' => json_encode($request->conversation),
+                    'identified_issue' => $request->identified_issue,
+                    'summary' => $request->summary,
+                ];
+                $this->aiDiscussion->update($data, $request->ai_discussion_id);
+                return ResponseHelper::success($data, 'Conversation updated successfully');
+            } catch (\Exception $e) {
+                return ResponseHelper::error($e->getMessage(), 500);
+            }
+        }
+
+        // When Request Don't Have ai_discussion_id, Create New Conversation
         try {
             $data = [
                 'user_id' => auth()->user()->uuid,
