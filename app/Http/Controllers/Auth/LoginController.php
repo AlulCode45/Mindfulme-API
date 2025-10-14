@@ -19,6 +19,7 @@ class LoginController extends Controller
             return ResponseHelper::success([
                 'user' => $user,
                 'token' => $user->createToken('auth_token')->plainTextToken,
+                'role' => $user->getRoleNames()->first(),
             ], 'Login successful');
         }
 
