@@ -46,6 +46,7 @@ class ComplaintController extends Controller
                 'title' => $request->title,
                 'chronology' => $request->chronology,
                 'category' => $request->category,
+                'chat_history' => $request->chat_history,
             ];
             $this->complaint->store($data);
             return ResponseHelper::success($data, 'Complaint submitted successfully');
