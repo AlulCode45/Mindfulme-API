@@ -22,6 +22,7 @@ class ComplaintRepository extends BaseRepository implements ComplaintInterface
         return $this->model
             ->query()
             ->with('evidence')
+            ->orderBy('created_at', 'desc')
             ->get();
     }
 
@@ -62,6 +63,6 @@ class ComplaintRepository extends BaseRepository implements ComplaintInterface
 
     public function getByUserUuid(string $uuid): array|Collection|Model
     {
-        return $this->model->where('user_id', $uuid)->get();
+        return $this->model->where('user_id', $uuid)->orderBy('created_at', 'desc')->get();
     }
 }
