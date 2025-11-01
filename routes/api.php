@@ -14,7 +14,9 @@ Route::post('forgot-password', [ForgotPassword::class, 'sendEmailResetPassword']
 Route::post('reset-password', [ForgotPassword::class, 'resetPassword']);
 
 Route::post('/logout', \App\Http\Controllers\Auth\LogoutController::class)->middleware('auth:sanctum');
-
+Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
+    return response()->json(['data' => auth()->user()]);
+});
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/midtrans/snap', [PaymentController::class, 'createSnapToken']);
