@@ -6,6 +6,7 @@ use App\Enums\ComplaintStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Complaints extends Model
@@ -22,6 +23,10 @@ class Complaints extends Model
         'status' => ComplaintStatus::class,
     ];
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'uuid');
+    }
     public function evidence(): HasMany
     {
         return $this->hasMany(Evidence::class, 'complaint_id', 'complaint_id');

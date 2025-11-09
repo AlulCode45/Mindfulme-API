@@ -21,7 +21,7 @@ class ComplaintRepository extends BaseRepository implements ComplaintInterface
     {
         return $this->model
             ->query()
-            ->with('evidence')
+            ->with('evidence', 'user')
             ->orderBy('created_at', 'desc')
             ->get();
     }
