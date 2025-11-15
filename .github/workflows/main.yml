@@ -1,0 +1,35 @@
+name: 🚀 Laravel CI/CD Deployment
+
+# Jalankan workflow saat:
+on:
+  push:
+    branches: [ main ]      # Saat push ke main
+  pull_request:
+    branches: [ main ]      # Saat PR ke main
+  workflow_dispatch:        # Bisa dijalankan manual dari GitHub UI
+
+jobs:
+  web-deploy:
+    name: 🌐 Auto Deploy to FTP Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Latest Code
+        uses: actions/checkout@v3
+
+      - name: 📦 Deploying via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}         # FTP host (disimpan di Secrets)
+          username: ${{ secrets.FTP_USERNAME }}     # FTP user
+          password: ${{ secrets.FTP_PASSWORD }}     # FTP password
+          protocol: ftp                             # Bisa diganti ke ftps atau sftp jika perlu
+          exclude: |                                # File & folder yang tidak diupload
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/vendor/**                            # Tambahkan vendor jika tidak perlu ikut upload
+            .env                                    # Jaga agar .env tidak ikut terupload
+
+      - name: ✅ Done!
+        run: echo "🚀 Laravel project deployed successfully to your FTP server!"
