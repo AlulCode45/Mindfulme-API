@@ -4,7 +4,7 @@ return [
     // Methods I want to allow for CORS:
     'allowed_methods' => ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE'],
     // Origins from where I allow access without CORS interference:
-    'allowed_origins' => ['http://localhost:8080'],
+    'allowed_origins' => ['http://localhost:8080', 'https://mindfulme.pusatandalan.com', 'https://app-mindfulme.pusatandalan.com'],
 
     'allowed_origins_patterns' => [],
 
