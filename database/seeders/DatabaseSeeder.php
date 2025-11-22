@@ -41,5 +41,10 @@ class DatabaseSeeder extends Seeder
         ]);
         $psychologist->assignRole(\App\Enums\Roles::PSYCHOLOGIST->value);
 
+        // Seed session types
+        $this->call([
+            SessionTypesSeeder::class,
+        ]);
+
     }
 }

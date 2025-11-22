@@ -6,6 +6,9 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BundlePackage\UserBundlePointController;
 use App\Http\Controllers\MidtransWebhookController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Session\PsychologistAvailabilityController;
+use App\Http\Controllers\Session\SessionController;
+use App\Http\Controllers\Session\SessionTypeController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [LoginController::class, 'login']);
@@ -45,6 +48,40 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/{uuid}', [\App\Http\Controllers\AIDiscussionController::class, 'deleteConversation']);
         Route::post('/save-conversation', [\App\Http\Controllers\AIDiscussionController::class, 'saveConversation']);
         Route::post('/send-to-complaint/{uuid}', [\App\Http\Controllers\AIDiscussionController::class, 'sendConversationToComplaint']);
+    });
+
+    // Session Scheduling Routes
+    Route::prefix('session-types')->group(function () {
+        Route::get('/', [SessionTypeController::class, 'index']);
+        Route::get('/{id}', [SessionTypeController::class, 'show']);
+        Route::get('/consultation-type/{type}', [SessionTypeController::class, 'getByConsultationType']);
+
+        // Admin only routes
+        Route::post('/', [SessionTypeController::class, 'store']);
+        Route::put('/{id}', [SessionTypeController::class, 'update']);
+        Route::delete('/{id}', [SessionTypeController::class, 'destroy']);
+    });
+
+    Route::prefix('psychologist-availability')->group(function () {
+        Route::get('/available-slots', [PsychologistAvailabilityController::class, 'getAvailableTimeSlots']);
+        Route::get('/check-availability', [PsychologistAvailabilityController::class, 'checkTimeSlotAvailability']);
+        Route::get('/', [PsychologistAvailabilityController::class, 'index']);
+        Route::get('/my', [PsychologistAvailabilityController::class, 'getMyAvailability']);
+        Route::get('/{id}', [PsychologistAvailabilityController::class, 'show']);
+        Route::post('/', [PsychologistAvailabilityController::class, 'store']);
+        Route::put('/{id}', [PsychologistAvailabilityController::class, 'update']);
+        Route::delete('/{id}', [PsychologistAvailabilityController::class, 'destroy']);
+    });
+
+    Route::prefix('sessions')->group(function () {
+        Route::get('/types', [SessionController::class, 'getSessionTypes']);
+        Route::post('/book', [SessionController::class, 'bookSession']);
+        Route::get('/my', [SessionController::class, 'getMySessions']);
+        Route::get('/upcoming', [SessionController::class, 'getUpcomingSessions']);
+        Route::get('/psychologist', [SessionController::class, 'getPsychologistSessions']);
+        Route::get('/{id}', [SessionController::class, 'getSessionDetails']);
+        Route::put('/{id}/status', [SessionController::class, 'updateSessionStatus']);
+        Route::post('/{id}/reschedule', [SessionController::class, 'rescheduleSession']);
     });
 });
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle']);

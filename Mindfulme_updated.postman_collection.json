@@ -1,0 +1,1685 @@
+{
+	"info": {
+		"_postman_id": "4f52d261-5ddd-4516-a5ca-6f92555bf2e2",
+		"name": "Mindfulme - Updated with Session Scheduling",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20863096"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse response JSON\r",
+									"let response = pm.response.json();\r",
+									"\r",
+									"// Cek apakah ada token\r",
+									"if (response.data && response.data.token && response.data.user.uuid) {\r",
+									"    pm.environment.set(\"auth_token\", response.data.token);\r",
+									"    pm.environment.set('user_uuid',response.data.user.uuid)\r",
+									"    console.log(\"Token saved to environment:\", response.data.token);\r",
+									"    console.log(\"User Uuid: \", response.data.user.uuid)\r",
+									"} else {\r",
+									"    console.log(\"No token found in response\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"user@mail.com\",\r\n    \"password\": \"password\"\r\n\r\n    // \"email\": \"admin@mail.com\",\r\n    // \"password\": \"password\"\r\n\r\n    // \"email\": \"psikolog@mail.com\",\r\n    // \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse response JSON\r",
+									"let response = pm.response.json();\r",
+									"\r",
+									"// Cek apakah ada token\r",
+									"if (response.data && response.data.token) {\r",
+									"    pm.environment.set(\"auth_token\", response.data.token);\r",
+									"    console.log(\"Token saved to environment:\", response.data.token);\r",
+									"} else {\r",
+									"    console.log(\"No token found in response\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"AlulCode\",\r\n    \"email\": \"alul@mail.com\",\r\n    \"password\": \"password\",\r\n    \"phone\": \"088801790233\",\r\n    \"address\": \"Malang, Indonesia\",\r\n    \"date_of_birth\": \"15-05-2006\",\r\n    \"bio\":\"Software Enginer\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/register",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"user@mail.com\",\r\n    \"password\": \"password\"\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/logout",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Me",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"user@mail.com\",\r\n    \"password\": \"password\"\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/me",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Session Scheduling",
+			"item": [
+				{
+					"name": "Session Types",
+					"item": [
+						{
+							"name": "Get All Session Types",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/session-types",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"session-types"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Session Types by Consultation Type",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/session-types/consultation-type/individual",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"session-types",
+										"consultation-type",
+										"individual"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Session Type (Admin Only)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Individual Counseling\",\r\n    \"description\": \"One-on-one counseling session for personal issues\",\r\n    \"duration_minutes\": 60,\r\n    \"price\": 250000.00,\r\n    \"consultation_type\": \"individual\",\r\n    \"color\": \"#3B82F6\",\r\n    \"max_participants\": 1,\r\n    \"requirements\": \"No specific requirements\",\r\n    \"is_active\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/session-types",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"session-types"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Psychologist Availability",
+					"item": [
+						{
+							"name": "Get Available Time Slots",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/psychologist-availability/available-slots?psychologist_id={{psychologist_uuid}}&date=2024-12-15&duration_minutes=60",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"psychologist-availability",
+										"available-slots"
+									],
+									"query": [
+										{
+											"key": "psychologist_id",
+											"value": "{{psychologist_uuid}}"
+										},
+										{
+											"key": "date",
+											"value": "2024-12-15"
+										},
+										{
+											"key": "duration_minutes",
+											"value": "60"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Check Time Slot Availability",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/psychologist-availability/check-availability?psychologist_id={{psychologist_uuid}}&date=2024-12-15&start_time=14:00&end_time=15:00",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"psychologist-availability",
+										"check-availability"
+									],
+									"query": [
+										{
+											"key": "psychologist_id",
+											"value": "{{psychologist_uuid}}"
+										},
+										{
+											"key": "date",
+											"value": "2024-12-15"
+										},
+										{
+											"key": "start_time",
+											"value": "14:00"
+										},
+										{
+											"key": "end_time",
+											"value": "15:00"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Create Availability (Psychologist Only)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"day_of_week\": \"monday\",\r\n    \"start_time\": \"09:00\",\r\n    \"end_time\": \"17:00\",\r\n    \"is_available\": true,\r\n    \"break_periods\": [\r\n        {\r\n            \"start\": \"12:00\",\r\n            \"end\": \"13:00\"\r\n        }\r\n    ],\r\n    \"effective_from\": \"2024-01-01\",\r\n    \"effective_to\": \"2024-12-31\",\r\n    \"notes\": \"Regular working hours\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/psychologist-availability",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"psychologist-availability"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get My Availability (Psychologist Only)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/psychologist-availability/my",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"psychologist-availability",
+										"my"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Session Management",
+					"item": [
+						{
+							"name": "Book Session",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"// Parse response JSON\r",
+											"let response = pm.response.json();\r",
+											"\r",
+											"if (response.data && response.data.appointment_id) {\r",
+											"    pm.environment.set(\"appointment_id\", response.data.appointment_id);\r",
+											"    console.log(\"Appointment ID saved:\", response.data.appointment_id);\r",
+											"} else {\r",
+											"    console.warn(\"No appointment ID found in response.\");\r",
+											"}\r",
+											""
+										],
+										"type": "text/javascript",
+										"packages": {},
+										"requests": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"psychologist_id\": \"{{psychologist_uuid}}\",\r\n    \"session_type_id\": \"{{session_type_uuid}}\",\r\n    \"start_time\": \"2024-12-15T14:00:00Z\",\r\n    \"session_title\": \"Anxiety Counseling Session\",\r\n    \"session_description\": \"Help with anxiety management\",\r\n    \"user_notes\": \"I've been experiencing anxiety for 6 months\",\r\n    \"complaint_id\": \"{{complaint_uuid}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/sessions/book",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sessions",
+										"book"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get My Sessions",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/sessions/my?status=scheduled&per_page=15",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sessions",
+										"my"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "scheduled"
+										},
+										{
+											"key": "per_page",
+											"value": "15"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Upcoming Sessions",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/sessions/upcoming",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sessions",
+										"upcoming"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Session Details",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/sessions/{{appointment_id}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sessions",
+										"{{appointment_id}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Session Status",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"status\": \"completed\",\r\n    \"psychologist_notes\": \"Session went well. Patient showed good progress.\",\r\n    \"cancellation_reason\": \"\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/sessions/{{appointment_id}}/status",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sessions",
+										"{{appointment_id}}",
+										"status"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Reschedule Session",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"new_start_time\": \"2024-12-16T14:00:00Z\",\r\n    \"reason\": \"Patient requested reschedule due to conflict\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/sessions/{{appointment_id}}/reschedule",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sessions",
+										"{{appointment_id}}",
+										"reschedule"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Session Types",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/sessions/types",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sessions",
+										"types"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Psychologist Sessions",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{url}}/sessions/psychologist?status=scheduled&per_page=15",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"sessions",
+										"psychologist"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "scheduled"
+										},
+										{
+											"key": "per_page",
+											"value": "15"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{auth_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Payment",
+			"item": [
+				{
+					"name": "Get Snaptoken",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"gross_amount\": 200000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/midtrans/snap",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"midtrans",
+								"snap"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bundle Packages",
+			"item": [
+				{
+					"name": "Bundle Point",
+					"item": [
+						{
+							"name": "Store Point",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{auth_token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"package_name\": \"Paket 1\",\r\n    \"description\": \"Sebuah paket maksimal\",\r\n    \"price\": 20000,\r\n    \"points\": 3\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}/bundle-package-points/purchase-point/{{current_uuid}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"bundle-package-points",
+										"purchase-point",
+										"{{current_uuid}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get User Point",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}/bundle-package-points/user/{{user_uuid}}",
+									"host": [
+										"{{url}}"
+									],
+									"path": [
+										"bundle-package-points",
+										"user",
+										"{{user_uuid}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{auth_token}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse response\r",
+									"let response = pm.response.json();\r",
+									"\r",
+									"// Ambil uuid pertama dari data array\r",
+									"if (response.data && response.data.length > 0) {\r",
+									"    let uuid = response.data[0].bundle_id;\r",
+									"    \r",
+									"    // Simpan ke environment variable dengan nama current_uuid\r",
+									"    pm.environment.set(\"current_uuid\", uuid);\r",
+									"    \r",
+									"    console.log(\"UUID disimpan ke env:\", uuid);\r",
+									"} else {\r",
+									"    console.warn(\"Data tidak ditemukan di response.\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/bundle-packages",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bundle-packages"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Show Data",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"gross_amount\": 200000\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/bundle-packages/{{current_uuid}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bundle-packages",
+								"{{current_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"package_name\": \"Paket 1\",\r\n    \"price\": \"20000.00\",\r\n    \"points\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/bundle-packages/{{current_uuid}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bundle-packages",
+								"{{current_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/bundle-packages/{{current_uuid}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bundle-packages",
+								"{{current_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{auth_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"package_name\": \"Paket 1\",\r\n    \"description\": \"Sebuah paket maksimal\",\r\n    \"price\": 20000,\r\n    \"points\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/bundle-packages",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"bundle-packages"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Complaint",
+			"item": [
+				{
+					"name": "Get Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse response\r",
+									"let response = pm.response.json();\r",
+									"if (response.data && response.data.length > 0) {\r",
+									"    let uuid = response.data[0].complaint_id;\r",
+									"    pm.environment.set(\"complaint_uuid\", uuid);\r",
+									"    \r",
+									"    console.log(\"UUID disimpan ke env:\", uuid);\r",
+									"} else {\r",
+									"    console.warn(\"Data tidak ditemukan di response.\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/complaints",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"complaints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Complaint",
+					"request": {
+						"method": "PUT",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Complaint",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Tes Complaint\",\r\n    \"chronology\": \"Complaint tested\",\r\n    \"category\": \"Risk\",\r\n    \"status\": \"Done\"\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/complaints/{{complaint_uuid}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"complaints",
+								"{{complaint_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Show",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/complaints/{{complaint_uuid}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"complaints",
+								"{{complaint_uuid}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Store Complaint",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Tes Complaint\",\r\n    \"chronology\": \"Complaint tested\",\r\n    \"category\": \"Risk\",\r\n    \"status\": \"Done\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/complaints",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"complaints"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Complaint",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/user/complaints/{{user_uuid}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"user",
+								"complaints",
+								"{{user_uuid}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{auth_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Ai Discussion",
+			"item": [
+				{
+					"name": "Store",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"conversation\": {\r\n        \"chat\": \"Hallo Alul\"\r\n    },\r\n    \"identified_issue\": \"Pengen Cepat Kaya\",\r\n    \"summary\": \"Si Alul Pengen cepet Kaya\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/ai-discussion/save-conversation",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ai-discussion",
+								"save-conversation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Conversation Chat",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"conversation\": {\r\n        \"chat\": \"Hallo Alul\",\r\n        \"reply\": \"Hai juga! Ada yang bisa saya bantu hari ini?\",\r\n        \"context\": \"Pengguna sedang mencoba fitur AI chat\",\r\n        \"timestamp\": \"2025-10-10T10:30:00Z\"\r\n    },\r\n    \"identified_issue\": \"Pengen Cepat Kaya\",\r\n    \"summary\": \"Si Alul Pengen cepet Kaya\",\r\n    \"ai_discussion_id\": \"{{ai_discussion_id}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/ai-discussion/save-conversation",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ai-discussion",
+								"save-conversation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Show",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ai-discussion/detail/{{ai_discussion_id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ai-discussion",
+								"detail",
+								"{{ai_discussion_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse response JSON\r",
+									"let response = pm.response.json();\r",
+									"\r",
+									"if (response.data && typeof response.data === 'object') {\r",
+									"    // Ambil user_id pertama sebagai key\r",
+									"    let firstUserId = Object.keys(response.data)[0];\r",
+									"\r",
+									"    // Ambil array data milik user pertama\r",
+									"    let discussions = response.data[firstUserId];\r",
+									"\r",
+									"    if (Array.isArray(discussions) && discussions.length > 0) {\r",
+									"        // Ambil ai_discussion_id pertama\r",
+									"        let uuid = discussions[0].ai_discussion_id;\r",
+									"\r",
+									"        // Simpan ke environment\r",
+									"        pm.environment.set(\"ai_discussion_id\", uuid);\r",
+									"\r",
+									"        console.log(\"UUID disimpan ke env:\", uuid);\r",
+									"    } else {\r",
+									"        console.warn(\"Array discussions kosong untuk user:\", firstUserId);\r",
+									"    }\r",
+									"} else {\r",
+									"    console.warn(\"Response data tidak sesuai format yang diharapkan.\");\r",
+									"}\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {},
+								"requests": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ai-discussion",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ai-discussion"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"user@mail.com\",\r\n    \"password\": \"password\"\r\n\r\n    // \"email\": \"admin@mail.com\",\r\n    // \"password\": \"password\"\r\n\r\n    // \"email\": \"psikolog@mail.com\",\r\n    // \"password\": \"password\"\r\n}"
+						},
+						"url": {
+							"raw": "{{url}}/ai-discussion/{{ai_discussion_id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ai-discussion",
+								"{{ai_discussion_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send To Complaint",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "evidence[0]",
+									"type": "file",
+									"src": "/C:/Users/ACode PC/Pictures/Screenshots/Screenshot (1).png"
+								},
+								{
+									"key": "evidence[1]",
+									"type": "file",
+									"src": "/C:/Users/ACode PC/Downloads/ChatGPT Image Sep 27, 2025, 05_05_40 PM.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/ai-discussion/send-to-complaint/{{ai_discussion_id}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ai-discussion",
+								"send-to-complaint",
+								"{{ai_discussion_id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Discussion",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/ai-discussion/user/{{user_uuid}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"ai-discussion",
+								"user",
+								"{{user_uuid}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{auth_token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"requests": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}
