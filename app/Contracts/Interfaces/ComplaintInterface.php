@@ -12,5 +12,5 @@ use Illuminate\Database\Eloquent\Model;
 
 interface ComplaintInterface extends GetInterface, StoreInterface, UpdateInterface, DeleteInterface, ShowInterface
 {
-    public function getByUserUuid(string $uuid): array|Collection|Model;
+    public function getByUserUuid(string $uuid, bool $withSessions = false): array|Collection|Model;
 }

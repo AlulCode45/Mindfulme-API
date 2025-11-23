@@ -18,13 +18,22 @@ class PsychologistAvailabilityRepository implements PsychologistAvailabilityInte
 
     public function get(): array
     {
-        return $this->model->with(['psychologist:id,uuid,name,email'])->get()->toArray();
+        return $this->model->with(['psychologist:uuid,name,email'])->get()->toArray();
     }
 
     public function getByPsychologistId(string $psychologistId): array
     {
         return $this->model->where('psychologist_id', $psychologistId)
-            ->orderByRaw("FIELD(day_of_week, 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')")
+            ->orderByRaw("CASE day_of_week
+                WHEN 'monday' THEN 1
+                WHEN 'tuesday' THEN 2
+                WHEN 'wednesday' THEN 3
+                WHEN 'thursday' THEN 4
+                WHEN 'friday' THEN 5
+                WHEN 'saturday' THEN 6
+                WHEN 'sunday' THEN 7
+                ELSE 8
+            END")
             ->get()
             ->toArray();
     }
@@ -43,7 +52,16 @@ class PsychologistAvailabilityRepository implements PsychologistAvailabilityInte
                 $query->whereNull('effective_to')
                       ->orWhere('effective_to', '>=', $today);
             })
-            ->orderByRaw("FIELD(day_of_week, 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')")
+            ->orderByRaw("CASE day_of_week
+                WHEN 'monday' THEN 1
+                WHEN 'tuesday' THEN 2
+                WHEN 'wednesday' THEN 3
+                WHEN 'thursday' THEN 4
+                WHEN 'friday' THEN 5
+                WHEN 'saturday' THEN 6
+                WHEN 'sunday' THEN 7
+                ELSE 8
+            END")
             ->get()
             ->toArray();
     }
@@ -68,7 +86,7 @@ class PsychologistAvailabilityRepository implements PsychologistAvailabilityInte
 
     public function show(string $id): PsychologistAvailability
     {
-        return $this->model->with(['psychologist:id,uuid,name,email'])->findOrFail($id);
+        return $this->model->with(['psychologist:uuid,name,email'])->findOrFail($id);
     }
 
     public function getAvailableTimeSlots(string $psychologistId, string $date, int $durationMinutes): array

@@ -20,10 +20,12 @@ class ComplaintController extends Controller
         return ResponseHelper::success($this->complaint->get(), 'Complaints retrieved successfully');
     }
 
-    public function getComplaintByUserUuid(string $uuid)
+    public function getComplaintByUserUuid(Request $request, string $uuid)
     {
         try {
-            return ResponseHelper::success($this->complaint->getByUserUuid($uuid), 'User complaints retrieved successfully');
+            $withSessions = $request->query('with_sessions', false);
+            $complaints = $this->complaint->getByUserUuid($uuid, $withSessions);
+            return ResponseHelper::success($complaints, 'User complaints retrieved successfully');
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }

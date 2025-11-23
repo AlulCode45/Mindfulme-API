@@ -66,8 +66,10 @@ class PsychologistAvailabilityController extends Controller
 
             // Check if the user owns this availability or is admin
             $user = auth()->user();
-            if (!$user->hasRole('superadmin') &&
-                $availability->psychologist_id !== $user->uuid) {
+            if (
+                !$user->hasRole('superadmin') &&
+                $availability->psychologist_id !== $user->uuid
+            ) {
                 return ResponseHelper::error('Unauthorized', 403);
             }
 
@@ -97,8 +99,10 @@ class PsychologistAvailabilityController extends Controller
 
             // Check if the user owns this availability
             $user = auth()->user();
-            if (!$user->hasRole('superadmin') &&
-                $existingAvailability->psychologist_id !== $user->uuid) {
+            if (
+                !$user->hasRole('superadmin') &&
+                $existingAvailability->psychologist_id !== $user->uuid
+            ) {
                 return ResponseHelper::error('Unauthorized', 403);
             }
 
@@ -117,8 +121,10 @@ class PsychologistAvailabilityController extends Controller
 
             // Check if the user owns this availability
             $user = auth()->user();
-            if (!$user->hasRole('superadmin') &&
-                $existingAvailability->psychologist_id !== $user->uuid) {
+            if (
+                !$user->hasRole('superadmin') &&
+                $existingAvailability->psychologist_id !== $user->uuid
+            ) {
                 return ResponseHelper::error('Unauthorized', 403);
             }
 

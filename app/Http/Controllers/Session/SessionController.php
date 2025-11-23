@@ -52,6 +52,7 @@ class SessionController extends Controller
             'session_description' => 'nullable|string|max:1000',
             'user_notes' => 'nullable|string|max:1000',
             'complaint_id' => 'nullable|exists:complaints,complaint_id',
+            'user_id' => 'sometimes|exists:users,uuid', // Allow psychologist to specify user_id
             'participants' => 'nullable|array',
             'participants.*.name' => 'required|string|max:255',
             'participants.*.email' => 'required|email|max:255',
@@ -79,20 +80,40 @@ class SessionController extends Controller
                 throw new \Exception('Selected time slot is not available');
             }
 
-            // Check if user owns the complaint (if provided)
+            // Determine the user_id for the appointment
+            $user = auth()->user();
+            $targetUserId = $validated['user_id'] ?? $user->uuid;
+
+            // Handle complaint_id - if not provided, create a default complaint
+            $complaintId = $validated['complaint_id'] ?? null;
+
             if (isset($validated['complaint_id'])) {
+                // Check if user owns the complaint (if provided)
                 $complaint = $this->complaint->show($validated['complaint_id']);
-                if ($complaint->user_id !== auth()->user()->uuid) {
+                if ($complaint->user_id !== $targetUserId) {
                     throw new \Exception('You can only book sessions for your own complaints');
                 }
+            } else {
+                // Create a default complaint for psychologist-initiated bookings
+                $defaultComplaintData = [
+                    'user_id' => $targetUserId,
+                    'title' => 'Sesi Konseling Psikolog',
+                    'description' => 'Sesi konseling yang dijadwalkan oleh psikolog',
+                    'category' => 'general',
+                    'chronology' => 'Sesi konseling langsung dengan psikolog',
+                    'status' => 'new'
+                ];
+
+                $defaultComplaint = $this->complaint->store($defaultComplaintData);
+                $complaintId = $defaultComplaint->complaint_id;
             }
 
             // Create the appointment
             $appointmentData = [
                 'psychologist_id' => $validated['psychologist_id'],
-                'user_id' => auth()->user()->uuid,
+                'user_id' => $targetUserId,
                 'session_type_id' => $validated['session_type_id'],
-                'complaint_id' => $validated['complaint_id'] ?? null,
+                'complaint_id' => $complaintId,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
                 'status' => AppointmentStatus::SCHEDULED,
@@ -109,7 +130,7 @@ class SessionController extends Controller
             DB::commit();
 
             // Load relationships for response
-            $appointment->load(['psychologist:id,uuid,name,email', 'user:id,uuid,name,email', 'sessionType']);
+            $appointment->load(['psychologist:uuid,name,email', 'user:uuid,name,email', 'sessionType']);
 
             return ResponseHelper::success($appointment, 'Session booked successfully', 201);
         } catch (\Exception $e) {
@@ -128,7 +149,7 @@ class SessionController extends Controller
         ]);
 
         try {
-            $query = Appointments::with(['psychologist:id,uuid,name,email', 'sessionType', 'complaint'])
+            $query = Appointments::with(['psychologist:uuid,name,email', 'sessionType', 'complaint'])
                 ->forUser(auth()->user()->uuid);
 
             // Apply filters
@@ -169,7 +190,7 @@ class SessionController extends Controller
         }
 
         try {
-            $query = Appointments::with(['user:id,uuid,name,email', 'sessionType', 'complaint'])
+            $query = Appointments::with(['user:uuid,name,email', 'sessionType', 'complaint'])
                 ->forPsychologist($user->hasRole('psychologist') ? $user->uuid : $request->get('psychologist_id'));
 
             // Apply filters
@@ -197,7 +218,7 @@ class SessionController extends Controller
     public function getUpcomingSessions(): JsonResponse
     {
         try {
-            $sessions = Appointments::with(['psychologist:id,uuid,name,email', 'sessionType'])
+            $sessions = Appointments::with(['psychologist:uuid,name,email', 'sessionType'])
                 ->forUser(auth()->user()->uuid)
                 ->upcoming()
                 ->orderBy('start_time', 'asc')
@@ -214,8 +235,8 @@ class SessionController extends Controller
     {
         try {
             $session = Appointments::with([
-                'psychologist:id,uuid,name,email',
-                'user:id,uuid,name,email',
+                'psychologist:uuid,name,email',
+                'user:uuid,name,email',
                 'sessionType',
                 'complaint'
             ])->findOrFail($id);

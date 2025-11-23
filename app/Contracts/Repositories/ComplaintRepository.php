@@ -61,8 +61,14 @@ class ComplaintRepository extends BaseRepository implements ComplaintInterface
             ->findOrFail($uuid);
     }
 
-    public function getByUserUuid(string $uuid): array|Collection|Model
+    public function getByUserUuid(string $uuid, bool $withSessions = false): array|Collection|Model
     {
-        return $this->model->where('user_id', $uuid)->orderBy('created_at', 'desc')->get();
+        $query = $this->model->where('user_id', $uuid)->orderBy('created_at', 'desc');
+
+        if ($withSessions) {
+            $query->with('sessions');
+        }
+
+        return $query->get();
     }
 }

@@ -27,6 +27,13 @@ class Complaints extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'uuid');
     }
+
+    public function sessions(): HasMany
+    {
+        return $this->hasMany(Appointments::class, 'complaint_id', 'complaint_id')
+            ->orderBy('start_time', 'desc');
+    }
+
     public function evidence(): HasMany
     {
         return $this->hasMany(Evidence::class, 'complaint_id', 'complaint_id');
