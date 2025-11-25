@@ -9,6 +9,9 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Session\PsychologistAvailabilityController;
 use App\Http\Controllers\Session\SessionController;
 use App\Http\Controllers\Session\SessionTypeController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Psychologist\PsychologistAnalyticsController;
+use App\Http\Controllers\Psychologist\PatientManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [LoginController::class, 'login']);
@@ -82,6 +85,29 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [SessionController::class, 'getSessionDetails']);
         Route::put('/{id}/status', [SessionController::class, 'updateSessionStatus']);
         Route::post('/{id}/reschedule', [SessionController::class, 'rescheduleSession']);
+    });
+
+    // Profile Management Routes
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'getProfile']);
+        Route::put('/', [ProfileController::class, 'updateProfile']);
+        Route::post('/change-password', [ProfileController::class, 'changePassword']);
+        Route::delete('/', [ProfileController::class, 'deleteAccount']);
+    });
+
+    // Psychologist Analytics Routes
+    Route::prefix('psychologist/analytics')->group(function () {
+        Route::get('/stats', [PsychologistAnalyticsController::class, 'getStats']);
+        Route::get('/sessions', [PsychologistAnalyticsController::class, 'getSessionAnalytics']);
+        Route::get('/patients', [PsychologistAnalyticsController::class, 'getPatients']);
+    });
+
+    // Psychologist Patient Management Routes
+    Route::prefix('psychologist/patients')->group(function () {
+        Route::get('/', [PatientManagementController::class, 'index']);
+        Route::get('/{userId}', [PatientManagementController::class, 'show']);
+        Route::get('/{userId}/sessions', [PatientManagementController::class, 'getSessionHistory']);
+        Route::post('/sessions/{sessionId}/notes', [PatientManagementController::class, 'addSessionNotes']);
     });
 });
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle']);

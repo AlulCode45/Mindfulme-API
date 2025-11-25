@@ -12,7 +12,21 @@ class UserDetail extends Model
     public $incrementing = false;
     protected $primaryKey = 'user_detail_id';
     protected $keyType = 'string';
-    protected $guarded = [''];
+    protected $fillable = [
+        'user_id',
+        'phone',
+        'address',
+        'photo',
+        'date_of_birth',
+        'bio',
+        'license_number',
+        'education',
+        'specialization',
+        'experience_years',
+        'clinic_name',
+        'clinic_address',
+        'consultation_fee'
+    ];
     public $timestamps = false;
 
 
