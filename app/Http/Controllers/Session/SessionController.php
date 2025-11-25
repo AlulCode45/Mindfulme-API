@@ -218,12 +218,25 @@ class SessionController extends Controller
     public function getUpcomingSessions(): JsonResponse
     {
         try {
-            $sessions = Appointments::with(['psychologist:uuid,name,email', 'sessionType'])
-                ->forUser(auth()->user()->uuid)
-                ->upcoming()
-                ->orderBy('start_time', 'asc')
-                ->limit(10)
-                ->get();
+            $user = auth()->user();
+
+            if ($user->hasRole('psychologist')) {
+                // For psychologists, get their upcoming sessions
+                $sessions = Appointments::with(['user:uuid,name,email', 'sessionType'])
+                    ->forPsychologist($user->uuid)
+                    ->upcoming()
+                    ->orderBy('start_time', 'asc')
+                    ->limit(10)
+                    ->get();
+            } else {
+                // For users, get their upcoming sessions
+                $sessions = Appointments::with(['psychologist:uuid,name,email', 'sessionType'])
+                    ->forUser($user->uuid)
+                    ->upcoming()
+                    ->orderBy('start_time', 'asc')
+                    ->limit(10)
+                    ->get();
+            }
 
             return ResponseHelper::success($sessions, 'Upcoming sessions retrieved successfully');
         } catch (\Exception $e) {
