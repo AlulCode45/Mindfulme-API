@@ -12,6 +12,9 @@ use App\Http\Controllers\Session\SessionTypeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Psychologist\PsychologistAnalyticsController;
 use App\Http\Controllers\Psychologist\PatientManagementController;
+use App\Http\Controllers\PsychologistController;
+use App\Http\Controllers\Admin\AdminAnalyticsController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [LoginController::class, 'login']);
@@ -22,6 +25,12 @@ Route::post('reset-password', [ForgotPassword::class, 'resetPassword']);
 Route::post('/logout', \App\Http\Controllers\Auth\LogoutController::class)->middleware('auth:sanctum');
 Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
     return response()->json(['data' => auth()->user()]);
+});
+
+// Public psychologist routes
+Route::prefix('psychologists')->group(function () {
+    Route::get('/', [PsychologistController::class, 'index']);
+    Route::get('/{uuid}', [PsychologistController::class, 'show']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -95,6 +104,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/', [ProfileController::class, 'deleteAccount']);
     });
 
+    // Admin Analytics Routes
+    Route::prefix('admin/analytics')->group(function () {
+        Route::get('/dashboard-stats', [AdminAnalyticsController::class, 'getDashboardStats']);
+        Route::get('/recent-activity', [AdminAnalyticsController::class, 'getRecentActivity']);
+        Route::get('/user-growth', [AdminAnalyticsController::class, 'getUserGrowthData']);
+        Route::get('/session-stats', [AdminAnalyticsController::class, 'getSessionStatsData']);
+    });
+
     // Psychologist Analytics Routes
     Route::prefix('psychologist/analytics')->group(function () {
         Route::get('/stats', [PsychologistAnalyticsController::class, 'getStats']);
@@ -108,6 +125,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{userId}', [PatientManagementController::class, 'show']);
         Route::get('/{userId}/sessions', [PatientManagementController::class, 'getSessionHistory']);
         Route::post('/sessions/{sessionId}/notes', [PatientManagementController::class, 'addSessionNotes']);
+    });
+
+    // Review Management Routes
+    Route::prefix('reviews')->group(function () {
+        Route::get('/', [ReviewController::class, 'index']);
+        Route::post('/', [ReviewController::class, 'store']);
+        Route::get('/user', [ReviewController::class, 'getUserReviews']);
+        Route::get('/{reviewId}', [ReviewController::class, 'show']);
+        Route::put('/{reviewId}', [ReviewController::class, 'update']);
+        Route::delete('/{reviewId}', [ReviewController::class, 'destroy']);
+        Route::get('/psychologist/{psychologistId}/stats', [ReviewController::class, 'getPsychologistStats']);
     });
 });
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle']);
