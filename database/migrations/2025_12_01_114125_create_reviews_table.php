@@ -22,7 +22,7 @@ return new class extends Migration
             $table->boolean('is_verified')->default(true); // Auto-verify from completed appointments
             $table->text('response')->nullable(); // Psychologist's response to review
             $table->dateTime('response_date')->nullable();
-            $timestamps();
+            $table->timestamps();
 
             // Foreign keys
             $table->foreign('psychologist_id')->references('uuid')->on('users')->onDelete('cascade');
