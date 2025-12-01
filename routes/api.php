@@ -15,6 +15,7 @@ use App\Http\Controllers\Psychologist\PatientManagementController;
 use App\Http\Controllers\PsychologistController;
 use App\Http\Controllers\Admin\AdminAnalyticsController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [LoginController::class, 'login']);
@@ -136,6 +137,19 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{reviewId}', [ReviewController::class, 'update']);
         Route::delete('/{reviewId}', [ReviewController::class, 'destroy']);
         Route::get('/psychologist/{psychologistId}/stats', [ReviewController::class, 'getPsychologistStats']);
+    });
+
+    // Chat Routes
+    Route::prefix('chat')->group(function () {
+        Route::get('/messages', [ChatController::class, 'getMessages']);
+        Route::get('/messages/{sessionId}', [ChatController::class, 'getMessages']);
+        Route::post('/send', [ChatController::class, 'sendMessage']);
+        Route::get('/partners', [ChatController::class, 'getChatPartners']);
+        Route::get('/sessions', [ChatController::class, 'getChatSessions']);
+        Route::post('/mark-read', [ChatController::class, 'markAsRead']);
+        Route::get('/unread-count', [ChatController::class, 'getUnreadCount']);
+        Route::put('/messages/{messageId}', [ChatController::class, 'updateMessage']);
+        Route::delete('/messages/{messageId}', [ChatController::class, 'deleteMessage']);
     });
 });
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle']);
