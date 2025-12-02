@@ -28,10 +28,17 @@ Route::middleware('auth:sanctum')->get('/me', function (Request $request) {
     return response()->json(['data' => auth()->user()]);
 });
 
-// Public psychologist routes
+// Public routes
 Route::prefix('psychologists')->group(function () {
     Route::get('/', [PsychologistController::class, 'index']);
     Route::get('/{uuid}', [PsychologistController::class, 'show']);
+});
+
+// Public session-types routes
+Route::prefix('session-types')->group(function () {
+    Route::get('/', [SessionTypeController::class, 'index']);
+    Route::get('/{id}', [SessionTypeController::class, 'show']);
+    Route::get('/consultation-type/{type}', [SessionTypeController::class, 'getByConsultationType']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -63,12 +70,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/send-to-complaint/{uuid}', [\App\Http\Controllers\AIDiscussionController::class, 'sendConversationToComplaint']);
     });
 
-    // Session Scheduling Routes
+    // Session Scheduling Routes (Protected - admin only)
     Route::prefix('session-types')->group(function () {
-        Route::get('/', [SessionTypeController::class, 'index']);
-        Route::get('/{id}', [SessionTypeController::class, 'show']);
-        Route::get('/consultation-type/{type}', [SessionTypeController::class, 'getByConsultationType']);
-
         // Admin only routes
         Route::post('/', [SessionTypeController::class, 'store']);
         Route::put('/{id}', [SessionTypeController::class, 'update']);
