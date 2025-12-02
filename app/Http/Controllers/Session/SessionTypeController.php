@@ -15,8 +15,8 @@ class SessionTypeController extends Controller
     public function __construct(SessionTypeInterface $sessionType)
     {
         $this->sessionType = $sessionType;
-        $this->middleware('auth:sanctum');
-        $this->middleware('role:superadmin')->except(['index', 'show']);
+        $this->middleware('auth:sanctum')->except(['index', 'show', 'getByConsultationType']);
+        $this->middleware('role:superadmin')->except(['index', 'show', 'getByConsultationType']);
     }
 
     public function index(): JsonResponse
