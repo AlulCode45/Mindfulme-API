@@ -14,8 +14,12 @@ use App\Http\Controllers\Psychologist\PsychologistAnalyticsController;
 use App\Http\Controllers\Psychologist\PatientManagementController;
 use App\Http\Controllers\PsychologistController;
 use App\Http\Controllers\Admin\AdminAnalyticsController;
+use App\Http\Controllers\Admin\AdminTestimonialController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\CounselorController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [LoginController::class, 'login']);
@@ -53,12 +57,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     Route::get('/user/complaints/{uuid}', [\App\Http\Controllers\ComplaintController::class, 'getComplaintByUserUuid']);
+    Route::get('/psychologist/complaints', [\App\Http\Controllers\ComplaintController::class, 'getPsychologistComplaints']);
     Route::prefix('/complaints')->group(function () {
         Route::get('/', [\App\Http\Controllers\ComplaintController::class, 'index']);
         Route::post('/', [\App\Http\Controllers\ComplaintController::class, 'storeComplaint']);
         Route::get('/{uuid}', [\App\Http\Controllers\ComplaintController::class, 'show']);
         Route::put('/{uuid}', [\App\Http\Controllers\ComplaintController::class, 'update']);
+        Route::put('/{uuid}/classify', [\App\Http\Controllers\ComplaintController::class, 'classify']);
         Route::delete('/{uuid}', [\App\Http\Controllers\ComplaintController::class, 'destroy']);
+        Route::post('/{uuid}/response', [\App\Http\Controllers\ComplaintController::class, 'sendResponse']);
+        Route::get('/{uuid}/responses', [\App\Http\Controllers\ComplaintController::class, 'getResponses']);
+        Route::get('/{uuid}/sessions', [\App\Http\Controllers\ComplaintController::class, 'getSessions']);
     });
 
     Route::prefix('ai-discussion')->group(function () {
@@ -116,6 +125,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/session-stats', [AdminAnalyticsController::class, 'getSessionStatsData']);
     });
 
+    // Admin Testimonial Management Routes
+    Route::prefix('admin/testimonials')->middleware(['role:superadmin'])->group(function () {
+        Route::get('/', [AdminTestimonialController::class, 'index']);
+        Route::put('/{testimonial}/approval', [AdminTestimonialController::class, 'updateApproval']);
+        Route::get('/stats', [AdminTestimonialController::class, 'getStats']);
+        Route::delete('/{testimonial}', [AdminTestimonialController::class, 'destroy']);
+    });
+
+    // Admin User Management Routes
+    Route::prefix('admin/users')->middleware(['role:superadmin'])->group(function () {
+        Route::get('/', [UserManagementController::class, 'index']);
+        Route::get('/stats', [UserManagementController::class, 'getStats']);
+        Route::get('/roles', [UserManagementController::class, 'getRoles']);
+        Route::get('/{uuid}', [UserManagementController::class, 'show']);
+        Route::post('/', [UserManagementController::class, 'store']);
+        Route::put('/{uuid}', [UserManagementController::class, 'update']);
+        Route::delete('/{uuid}', [UserManagementController::class, 'destroy']);
+        Route::put('/{uuid}/toggle-status', [UserManagementController::class, 'toggleStatus']);
+    });
+
     // Psychologist Analytics Routes
     Route::prefix('psychologist/analytics')->group(function () {
         Route::get('/stats', [PsychologistAnalyticsController::class, 'getStats']);
@@ -142,6 +171,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/psychologist/{psychologistId}/stats', [ReviewController::class, 'getPsychologistStats']);
     });
 
+    // Testimonial Routes
+    Route::prefix('testimonials')->group(function () {
+        Route::get('/', [TestimonialController::class, 'index']);
+        Route::get('/all', [TestimonialController::class, 'indexAll']); // Admin only - get all testimonials
+        Route::post('/', [TestimonialController::class, 'store']);
+        Route::get('/user', [TestimonialController::class, 'userTestimonials']);
+        Route::get('/{testimonial}', [TestimonialController::class, 'show']);
+        Route::put('/{testimonial}', [TestimonialController::class, 'update']);
+        Route::delete('/{testimonial}', [TestimonialController::class, 'destroy']);
+    });
+
     // Chat Routes
     Route::prefix('chat')->group(function () {
         Route::get('/messages', [ChatController::class, 'getMessages']);
@@ -154,5 +194,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/messages/{messageId}', [ChatController::class, 'updateMessage']);
         Route::delete('/messages/{messageId}', [ChatController::class, 'deleteMessage']);
     });
+
+    // WhatsApp notification routes (protected)
+    Route::prefix('whatsapp')->group(function () {
+        Route::post('/send', [\App\Http\Controllers\WhatsAppController::class, 'sendNotification']);
+        Route::get('/templates', [\App\Http\Controllers\WhatsAppController::class, 'getTemplates']);
+        Route::get('/status', [\App\Http\Controllers\WhatsAppController::class, 'getStatus']);
+    });
+
+    // Additional public routes
+    Route::get('/testimonials/user/{uuid}', [\App\Http\Controllers\TestimonialController::class, 'getUserTestimonials']);
+
+    // Counselor routes
+    Route::prefix('counselors')->group(function () {
+        Route::get('/available', [CounselorController::class, 'getAvailable']);
+    });
 });
+
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle']);

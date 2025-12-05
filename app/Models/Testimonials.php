@@ -18,12 +18,25 @@ class Testimonials extends Model
     protected $guarded = [''];
 
     public $casts = [
-        'status' => TestimonialApprovalStatus::class
+        'approval_status' => TestimonialApprovalStatus::class,
+        'anonymous' => 'boolean',
+        'rating' => 'integer'
     ];
+
+    protected $with = ['user'];
+
     protected static function booted(): void
     {
         static::creating(function (Testimonials $testimonial) {
             $testimonial->testimonial_id = (string) \Illuminate\Support\Str::uuid();
         });
+    }
+
+    /**
+     * Get the user that owns the testimonial.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

@@ -21,7 +21,7 @@ class ComplaintRepository extends BaseRepository implements ComplaintInterface
     {
         return $this->model
             ->query()
-            ->with('evidence', 'user')
+            ->with('evidence', 'user.detail')
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -57,7 +57,7 @@ class ComplaintRepository extends BaseRepository implements ComplaintInterface
     {
         return $this->model
             ->query()
-            ->with('evidence')
+            ->with('evidence', 'user.detail')
             ->findOrFail($uuid);
     }
 
@@ -70,5 +70,17 @@ class ComplaintRepository extends BaseRepository implements ComplaintInterface
         }
 
         return $query->get();
+    }
+
+    /**
+     * Get psychologist complaints (classified as psychology)
+     */
+    public function getPsychologistComplaints(): array|Collection
+    {
+        return $this->model
+            ->where('classification', 'psikologi')
+            ->with(['user.detail', 'evidence'])
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 }

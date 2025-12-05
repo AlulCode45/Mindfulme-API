@@ -65,4 +65,147 @@ class ComplaintController extends Controller
             return ResponseHelper::error($e->getMessage());
         }
     }
+
+    /**
+     * Get complaints for psychologist (filtered by psychology classification)
+     */
+    public function getPsychologistComplaints()
+    {
+        try {
+            // Get all complaints classified as psychology
+            $complaints = $this->complaint->getPsychologistComplaints();
+            return ResponseHelper::success($complaints, 'Psychologist complaints retrieved successfully');
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Update complaint status and details
+     */
+    public function update(Request $request, string $uuid)
+    {
+        try {
+            $data = $request->validate([
+                'status' => 'sometimes|in:new,in-progress,completed,urgent',
+                'assigned_to' => 'sometimes|string|max:255',
+                'admin_notes' => 'sometimes|string|max:1000',
+                'priority' => 'sometimes|in:low,medium,high,urgent',
+                'classification' => 'sometimes|in:psikologi,hukum',
+                'scheduled_date' => 'sometimes|date',
+                'scheduled_time' => 'sometimes|string'
+            ]);
+
+            $complaint = $this->complaint->show($uuid);
+            $updatedComplaint = $this->complaint->update($data, $uuid);
+
+            return ResponseHelper::success($updatedComplaint, 'Complaint updated successfully');
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Send response to complaint
+     */
+    public function sendResponse(Request $request, string $uuid)
+    {
+        try {
+            $request->validate([
+                'message' => 'required|string|max:2000',
+                'admin_id' => 'sometimes|string'
+            ]);
+
+            $complaint = $this->complaint->show($uuid);
+
+            // Create response record (you might need to create a ComplaintResponse model)
+            // For now, we'll just update the admin notes
+            $data = [
+                'admin_notes' => ($complaint->admin_notes ?? '') . "\n\nResponse: " . $request->message,
+                'status' => 'in-progress'
+            ];
+
+            $updatedComplaint = $this->complaint->update($data, $uuid);
+
+            return ResponseHelper::success($updatedComplaint, 'Response sent successfully');
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Get complaint responses/history
+     */
+    public function getResponses(string $uuid)
+    {
+        try {
+            $complaint = $this->complaint->show($uuid);
+
+            // For now, return basic info. You might want to create a proper response history
+            $responses = [
+                [
+                    'id' => 'system-001',
+                    'type' => 'system',
+                    'author' => 'Sistem',
+                    'message' => 'Pengaduan telah dibuat',
+                    'timestamp' => $complaint->created_at
+                ]
+            ];
+
+            if ($complaint->admin_notes) {
+                $responses[] = [
+                    'id' => 'admin-001',
+                    'type' => 'admin',
+                    'author' => 'Admin',
+                    'message' => $complaint->admin_notes,
+                    'timestamp' => $complaint->updated_at
+                ];
+            }
+
+            return ResponseHelper::success($responses, 'Complaint responses retrieved successfully');
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Get complaint sessions/consultations
+     */
+    public function getSessions(string $uuid)
+    {
+        try {
+            $complaint = $this->complaint->show($uuid);
+            $sessions = $complaint->sessions ?? [];
+
+            return ResponseHelper::success($sessions, 'Complaint sessions retrieved successfully');
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
+
+    /**
+     * Classify complaint
+     */
+    public function classify(Request $request, string $uuid)
+    {
+        try {
+            $data = $request->validate([
+                'classification' => 'required|in:psikologi,hukum',
+                'admin_notes' => 'required|string|max:1000',
+                'scheduled_date' => 'sometimes|date',
+                'scheduled_time' => 'sometimes|string',
+                'assigned_to' => 'sometimes|string|max:255'
+            ]);
+
+            $complaint = $this->complaint->show($uuid);
+
+            // Set status to in-progress when classified
+            $data['status'] = 'in-progress';
+
+            $updatedComplaint = $this->complaint->update($data, $uuid);
+            return ResponseHelper::success($updatedComplaint, 'Complaint classified successfully');
+        } catch (\Exception $e) {
+            return ResponseHelper::error($e->getMessage());
+        }
+    }
 }
