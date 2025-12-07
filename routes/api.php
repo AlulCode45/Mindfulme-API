@@ -212,3 +212,9 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle']);
+
+// Include content management routes
+require __DIR__.'/content.php';
+
+// Include volunteer routes
+require __DIR__.'/volunteer.php';

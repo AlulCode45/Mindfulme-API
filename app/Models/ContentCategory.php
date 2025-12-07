@@ -3,13 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
 class ContentCategory extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'name',
@@ -24,9 +23,9 @@ class ContentCategory extends Model
         'is_active' => 'boolean',
     ];
 
-    protected $dates = [
-        'deleted_at',
-    ];
+    protected $keyType = 'string';
+
+    public $incrementing = false;
 
     // Generate slug automatically
     protected static function boot()

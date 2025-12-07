@@ -30,6 +30,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'role',
+        'address',
+        'motivation',
+        'volunteer_status',
+        'volunteer_notes',
     ];
 
     /**
@@ -59,5 +65,32 @@ class User extends Authenticatable
     public function detail(): HasOne
     {
         return $this->hasOne(UserDetail::class, 'user_id', 'uuid');
+    }
+
+    // Volunteer scopes
+    public function scopeVolunteers($query)
+    {
+        return $query->where('role', 'volunteer');
+    }
+
+    public function scopePendingVolunteers($query)
+    {
+        return $query->where('role', 'volunteer')->where('volunteer_status', 'pending');
+    }
+
+    public function scopeApprovedVolunteers($query)
+    {
+        return $query->where('role', 'volunteer')->where('volunteer_status', 'approved');
+    }
+
+    // Helper methods
+    public function isVolunteer(): bool
+    {
+        return $this->role === 'volunteer';
+    }
+
+    public function isApprovedVolunteer(): bool
+    {
+        return $this->role === 'volunteer' && $this->volunteer_status === 'approved';
     }
 }

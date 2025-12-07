@@ -68,10 +68,11 @@ class ContentController extends Controller
 
         $recentActivity = $recentArticles->concat($recentVideos)
             ->map(function ($item) {
+                $type = ($item instanceof \App\Models\Article) ? 'article' : 'video';
                 return [
-                    'type' => $item instanceof Article ? 'article' : 'video',
+                    'type' => $type,
                     'title' => $item->title,
-                    'date' => $item->published_at?->format('Y-m-d') : $item->created_at->format('Y-m-d'),
+                    'date' => $item->published_at ? $item->published_at->format('Y-m-d') : $item->created_at->format('Y-m-d'),
                     'views' => $item->view_count,
                 ];
             })

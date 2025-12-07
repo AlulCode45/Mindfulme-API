@@ -27,13 +27,25 @@ Route::prefix('articles')->group(function () {
     Route::get('/', [ArticleController::class, 'index']);
     Route::get('/slug/{slug}', [ArticleController::class, 'getBySlug']);
 
+    // Public volunteer submission route
+    Route::post('/volunteer-submit', [ArticleController::class, 'volunteerSubmit']);
+
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [ArticleController::class, 'store']);
+
+        // Verification workflow routes (must come before parameterized routes)
+        Route::get('/pending-verification', [ArticleController::class, 'pendingVerification']);
+
+        // Volunteer specific routes
+        Route::get('/volunteer/my-articles', [ArticleController::class, 'getVolunteerArticles']);
+
         Route::get('/{article}', [ArticleController::class, 'show']);
         Route::put('/{article}', [ArticleController::class, 'update']);
         Route::delete('/{article}', [ArticleController::class, 'destroy']);
         Route::post('/{article}/view', [ArticleController::class, 'trackView']);
+        Route::post('/{article}/approve', [ArticleController::class, 'approve']);
+        Route::post('/{article}/reject', [ArticleController::class, 'reject']);
     });
 });
 

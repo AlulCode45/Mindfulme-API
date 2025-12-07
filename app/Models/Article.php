@@ -3,15 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Str;
 
 class Article extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
+        'id',
         'title',
         'slug',
         'excerpt',
@@ -20,6 +20,10 @@ class Article extends Model
         'author_id',
         'category_id',
         'status',
+        'verification_status',
+        'verification_notes',
+        'verified_by',
+        'verified_at',
         'published_at',
         'view_count',
         'read_time_minutes',
@@ -30,14 +34,19 @@ class Article extends Model
 
     protected $casts = [
         'published_at' => 'datetime',
+        'verified_at' => 'datetime',
         'view_count' => 'integer',
         'read_time_minutes' => 'integer',
     ];
 
     protected $dates = [
         'published_at',
-        'deleted_at',
+        'verified_at',
     ];
+
+    protected $keyType = 'string';
+
+    public $incrementing = false;
 
     // Generate slug automatically
     protected static function boot()
@@ -61,6 +70,11 @@ class Article extends Model
     public function author()
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function verifier()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 
     public function category()
@@ -89,6 +103,21 @@ class Article extends Model
     public function scopeArchived($query)
     {
         return $query->where('status', 'archived');
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('verification_status', 'pending');
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('verification_status', 'approved');
+    }
+
+    public function scopeRejected($query)
+    {
+        return $query->where('verification_status', 'rejected');
     }
 
     public function scopeByCategory($query, $categorySlug)

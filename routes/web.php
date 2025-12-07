@@ -6,3 +6,6 @@ use Laravel\Socialite\Facades\Socialite;
 
 Route::get('auth/google/redirect', [OAuthController::class, 'googleRedirect']);
 Route::get('auth/google/callback', [OAuthController::class, 'googleCallback']);
+
+// Include content management routes for public API access
+require __DIR__.'/content.php';

@@ -92,20 +92,30 @@ class ArticleController extends Controller
 
     public function store(Request $request)
     {
+        // Handle tag_ids specially - it can come as JSON string or array
+        $tagIds = $request->input('tag_ids');
+        if (is_string($tagIds)) {
+            $tagIds = json_decode($tagIds, true) ?? [];
+        }
+        if (!is_array($tagIds)) {
+            $tagIds = [];
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'excerpt' => 'required|string|max:500',
             'content' => 'required|string',
-            'category_id' => 'required|exists:content_categories,id',
-            'tag_ids' => 'array',
-            'tag_ids.*' => 'exists:content_tags,id',
+            'category_id' => 'required|string|exists:content_categories,id',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'status' => 'enum:draft,published,archived',
+            'status' => 'in:draft,published,archived',
             'published_at' => 'nullable|date',
             'seo_title' => 'nullable|string|max:255',
             'seo_description' => 'nullable|string|max:500',
             'seo_keywords' => 'nullable|string|max:255',
         ]);
+
+        // Manually add tag_ids to validated data
+        $validated['tag_ids'] = $tagIds;
 
         // Handle featured image upload
         if ($request->hasFile('featured_image')) {
@@ -126,6 +136,9 @@ class ArticleController extends Controller
         }
 
         $validated['author_id'] = auth()->id();
+
+        // Generate UUID for the article
+        $validated['id'] = Str::uuid()->toString();
 
         $article = Article::create($validated);
 
@@ -150,20 +163,30 @@ class ArticleController extends Controller
 
     public function update(Request $request, Article $article)
     {
+        // Handle tag_ids specially - it can come as JSON string or array
+        $tagIds = $request->input('tag_ids');
+        if (is_string($tagIds)) {
+            $tagIds = json_decode($tagIds, true) ?? [];
+        }
+        if (!is_array($tagIds)) {
+            $tagIds = [];
+        }
+
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
             'excerpt' => 'sometimes|string|max:500',
             'content' => 'sometimes|string',
-            'category_id' => 'sometimes|exists:content_categories,id',
-            'tag_ids' => 'array',
-            'tag_ids.*' => 'exists:content_tags,id',
+            'category_id' => 'sometimes|string|exists:content_categories,id',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'status' => 'sometimes|enum:draft,published,archived',
+            'status' => 'sometimes|in:draft,published,archived',
             'published_at' => 'nullable|date',
             'seo_title' => 'sometimes|string|max:255',
             'seo_description' => 'sometimes|string|max:500',
             'seo_keywords' => 'sometimes|string|max:255',
         ]);
+
+        // Manually add tag_ids to validated data
+        $validated['tag_ids'] = $tagIds;
 
         // Handle featured image upload
         if ($request->hasFile('featured_image')) {
@@ -261,5 +284,185 @@ class ArticleController extends Controller
             'message' => 'Article retrieved successfully',
             'data' => $article,
         ]);
+    }
+
+    /**
+     * Handle volunteer news article submission
+     */
+    public function volunteerSubmit(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|min:10|max:255',
+            'excerpt' => 'required|string|min:20|max:500',
+            'content' => 'required|string|min:100',
+            'author_name' => 'required|string|max:255',
+            'author_email' => 'required|email|max:255',
+            'author_phone' => 'required|string|max:20',
+            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'type' => 'required|in:volunteer_submission',
+        ]);
+
+        // Get the news category ID first
+        $newsCategory = ContentCategory::where('slug', 'news')->first();
+        if (!$newsCategory) {
+            return response()->json([
+                'success' => false,
+                'message' => 'News category not found',
+            ], 404);
+        }
+
+        try {
+            $articleData = [
+                'id' => Str::uuid()->toString(),
+                'title' => $validated['title'],
+                'slug' => Str::slug($validated['title']),
+                'excerpt' => $validated['excerpt'],
+                'content' => $validated['content'],
+                'author_name' => $validated['author_name'],
+                'author_email' => $validated['author_email'],
+                'author_phone' => $validated['author_phone'],
+                'category_id' => $newsCategory->id,
+                'status' => 'draft',
+                'verification_status' => 'pending',
+                'verification_notes' => 'Submitted by volunteer. Waiting for admin review.',
+                'view_count' => 0,
+                'read_time_minutes' => ceil(str_word_count(strip_tags($validated['content'])) / 200),
+            ];
+
+            // Handle featured image upload
+            if ($request->hasFile('featured_image')) {
+                $image = $request->file('featured_image');
+                $imagePath = $image->store('articles/images', 'public');
+                $articleData['featured_image'] = $imagePath;
+            }
+
+            $article = Article::create($articleData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Article submitted successfully. Your article is now under review by our admin team.',
+                'data' => $article->load(['category']),
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit article: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get articles pending verification
+     */
+    public function pendingVerification(Request $request)
+    {
+        $query = Article::with(['author', 'category'])
+            ->pending()
+            ->orderBy('created_at', 'desc');
+
+        // Pagination
+        $limit = min($request->input('limit', 10), 50);
+        $articles = $query->paginate($limit);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pending articles retrieved successfully',
+            'data' => $articles->items(),
+            'meta' => [
+                'current_page' => $articles->currentPage(),
+                'last_page' => $articles->lastPage(),
+                'per_page' => $articles->perPage(),
+                'total' => $articles->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * Approve article
+     */
+    public function approve(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'verification_notes' => 'nullable|string|max:1000',
+        ]);
+
+        try {
+            $article->update([
+                'verification_status' => 'approved',
+                'verified_by' => auth()->id(),
+                'verified_at' => now(),
+                'verification_notes' => $validated['verification_notes'] ?? 'Article approved and published.',
+                'status' => 'published',
+                'published_at' => now(),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Article approved successfully',
+                'data' => $article->load(['author', 'category', 'verifier']),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to approve article: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Reject article
+     */
+    public function reject(Request $request, Article $article)
+    {
+        $validated = $request->validate([
+            'verification_notes' => 'required|string|max:1000',
+        ]);
+
+        try {
+            $article->update([
+                'verification_status' => 'rejected',
+                'verified_by' => auth()->id(),
+                'verified_at' => now(),
+                'verification_notes' => $validated['verification_notes'],
+                'status' => 'draft',
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Article rejected successfully',
+                'data' => $article->load(['author', 'category', 'verifier']),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to reject article: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Get volunteer's articles
+     */
+    public function getVolunteerArticles(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            // Get articles submitted by this volunteer user
+            $articles = Article::where('type', 'volunteer_submission')
+                ->where('author_email', $user->email)
+                ->orderBy('created_at', 'desc')
+                ->get(['uuid', 'title', 'excerpt', 'verification_status', 'verification_notes', 'created_at', 'view_count']);
+
+            return response()->json([
+                'message' => 'Volunteer articles retrieved successfully',
+                'data' => $articles
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to get volunteer articles: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 }
