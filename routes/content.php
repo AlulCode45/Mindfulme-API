@@ -27,8 +27,9 @@ Route::prefix('articles')->group(function () {
     Route::get('/', [ArticleController::class, 'index']);
     Route::get('/slug/{slug}', [ArticleController::class, 'getBySlug']);
 
-    // Public volunteer submission route
-    Route::post('/volunteer-submit', [ArticleController::class, 'volunteerSubmit']);
+    // Public volunteer submission route (protected by sanctum)
+    Route::post('/volunteer-submit', [ArticleController::class, 'volunteerSubmit'])
+        ->middleware('auth:sanctum');
 
     // Protected routes
     Route::middleware('auth:sanctum')->group(function () {
@@ -38,7 +39,8 @@ Route::prefix('articles')->group(function () {
         Route::get('/pending-verification', [ArticleController::class, 'pendingVerification']);
 
         // Volunteer specific routes
-        Route::get('/volunteer/my-articles', [ArticleController::class, 'getVolunteerArticles']);
+        Route::get('/volunteer/my-articles', [ArticleController::class, 'getVolunteerArticles'])
+            ->middleware('auth:sanctum');
 
         Route::get('/{article}', [ArticleController::class, 'show']);
         Route::put('/{article}', [ArticleController::class, 'update']);

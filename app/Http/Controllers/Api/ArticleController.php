@@ -66,10 +66,34 @@ class ArticleController extends Controller
         $limit = min($request->input('limit', 10), 50);
         $articles = $query->paginate($limit);
 
+        // Transform articles to include author info for volunteer submissions
+        $transformedArticles = $articles->getCollection()->map(function ($article) {
+            $data = $article->toArray();
+            $data['author_name'] = $article->author_name;
+            $data['author_email'] = $article->author_email;
+            $data['author_phone'] = $article->author_phone;
+
+            // Create author object with info
+            if ($article->author) {
+                $data['author'] = [
+                    'name' => $article->author->name,
+                    'email' => $article->author->email
+                ];
+            } elseif ($article->type === 'volunteer_submission') {
+                // For volunteer submissions, create author object from fields
+                $data['author'] = [
+                    'name' => $article->author_name,
+                    'email' => $article->author_email
+                ];
+            }
+
+            return $data;
+        });
+
         return response()->json([
             'success' => true,
             'message' => 'Articles retrieved successfully',
-            'data' => $articles->items(),
+            'data' => $transformedArticles,
             'meta' => [
                 'current_page' => $articles->currentPage(),
                 'last_page' => $articles->lastPage(),
@@ -83,10 +107,29 @@ class ArticleController extends Controller
     {
         $article->load(['author', 'category', 'tags']);
 
+        $data = $article->toArray();
+        $data['author_name'] = $article->author_name;
+        $data['author_email'] = $article->author_email;
+        $data['author_phone'] = $article->author_phone;
+
+        // Create author object with info
+        if ($article->author) {
+            $data['author'] = [
+                'name' => $article->author->name,
+                'email' => $article->author->email
+            ];
+        } elseif ($article->type === 'volunteer_submission') {
+            // For volunteer submissions, create author object from fields
+            $data['author'] = [
+                'name' => $article->author_name,
+                'email' => $article->author_email
+            ];
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Article retrieved successfully',
-            'data' => $article,
+            'data' => $data,
         ]);
     }
 
@@ -295,12 +338,23 @@ class ArticleController extends Controller
             'title' => 'required|string|min:10|max:255',
             'excerpt' => 'required|string|min:20|max:500',
             'content' => 'required|string|min:100',
-            'author_name' => 'required|string|max:255',
-            'author_email' => 'required|email|max:255',
-            'author_phone' => 'required|string|max:20',
             'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'type' => 'required|in:volunteer_submission',
         ]);
+
+        // Get the authenticated user
+        $user = $request->user();
+        if (!$user || $user->role !== 'volunteer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only volunteers can submit articles.',
+            ], 403);
+        }
+
+        // Get author info from authenticated user
+        $validated['author_name'] = $user->name;
+        $validated['author_email'] = $user->email;
+        $validated['author_phone'] = $user->phone ?? '';
 
         // Get the news category ID first
         $newsCategory = ContentCategory::where('slug', 'news')->first();
@@ -312,15 +366,27 @@ class ArticleController extends Controller
         }
 
         try {
-            $articleData = [
+            // Generate unique slug
+          $slug = Str::slug($validated['title']);
+          $originalSlug = $slug;
+          $counter = 1;
+
+          // Ensure slug is unique
+          while (Article::where('slug', $slug)->exists()) {
+              $slug = $originalSlug . '-' . $counter;
+              $counter++;
+          }
+
+          $articleData = [
                 'id' => Str::uuid()->toString(),
                 'title' => $validated['title'],
-                'slug' => Str::slug($validated['title']),
+                'slug' => $slug,
                 'excerpt' => $validated['excerpt'],
                 'content' => $validated['content'],
                 'author_name' => $validated['author_name'],
                 'author_email' => $validated['author_email'],
                 'author_phone' => $validated['author_phone'],
+                'type' => 'volunteer_submission',
                 'category_id' => $newsCategory->id,
                 'status' => 'draft',
                 'verification_status' => 'pending',
@@ -365,10 +431,34 @@ class ArticleController extends Controller
         $limit = min($request->input('limit', 10), 50);
         $articles = $query->paginate($limit);
 
+        // Transform articles to include author info for volunteer submissions
+        $transformedArticles = $articles->getCollection()->map(function ($article) {
+            $data = $article->toArray();
+            $data['author_name'] = $article->author_name;
+            $data['author_email'] = $article->author_email;
+            $data['author_phone'] = $article->author_phone;
+
+            // Create author object with info
+            if ($article->author) {
+                $data['author'] = [
+                    'name' => $article->author->name,
+                    'email' => $article->author->email
+                ];
+            } elseif ($article->type === 'volunteer_submission') {
+                // For volunteer submissions, create author object from fields
+                $data['author'] = [
+                    'name' => $article->author_name,
+                    'email' => $article->author_email
+                ];
+            }
+
+            return $data;
+        });
+
         return response()->json([
             'success' => true,
             'message' => 'Pending articles retrieved successfully',
-            'data' => $articles->items(),
+            'data' => $transformedArticles,
             'meta' => [
                 'current_page' => $articles->currentPage(),
                 'last_page' => $articles->lastPage(),
@@ -397,10 +487,30 @@ class ArticleController extends Controller
                 'published_at' => now(),
             ]);
 
+            $article->load(['author', 'category', 'verifier']);
+            $data = $article->toArray();
+            $data['author_name'] = $article->author_name;
+            $data['author_email'] = $article->author_email;
+            $data['author_phone'] = $article->author_phone;
+
+            // Create author object with info
+            if ($article->author) {
+                $data['author'] = [
+                    'name' => $article->author->name,
+                    'email' => $article->author->email
+                ];
+            } elseif ($article->type === 'volunteer_submission') {
+                // For volunteer submissions, create author object from fields
+                $data['author'] = [
+                    'name' => $article->author_name,
+                    'email' => $article->author_email
+                ];
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Article approved successfully',
-                'data' => $article->load(['author', 'category', 'verifier']),
+                'data' => $data,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -428,10 +538,30 @@ class ArticleController extends Controller
                 'status' => 'draft',
             ]);
 
+            $article->load(['author', 'category', 'verifier']);
+            $data = $article->toArray();
+            $data['author_name'] = $article->author_name;
+            $data['author_email'] = $article->author_email;
+            $data['author_phone'] = $article->author_phone;
+
+            // Create author object with info
+            if ($article->author) {
+                $data['author'] = [
+                    'name' => $article->author->name,
+                    'email' => $article->author->email
+                ];
+            } elseif ($article->type === 'volunteer_submission') {
+                // For volunteer submissions, create author object from fields
+                $data['author'] = [
+                    'name' => $article->author_name,
+                    'email' => $article->author_email
+                ];
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Article rejected successfully',
-                'data' => $article->load(['author', 'category', 'verifier']),
+                'data' => $data,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -447,20 +577,33 @@ class ArticleController extends Controller
     public function getVolunteerArticles(Request $request)
     {
         try {
+            // Get the authenticated user from Sanctum
             $user = $request->user();
 
+            // Check if user exists and is a volunteer
+            if (!$user || $user->role !== 'volunteer') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Only volunteers can access this endpoint.',
+                    'data' => []
+                ], 403);
+            }
+
             // Get articles submitted by this volunteer user
+            // Match by author_email in the articles table
             $articles = Article::where('type', 'volunteer_submission')
                 ->where('author_email', $user->email)
                 ->orderBy('created_at', 'desc')
-                ->get(['uuid', 'title', 'excerpt', 'verification_status', 'verification_notes', 'created_at', 'view_count']);
+                ->get(['id', 'title', 'excerpt', 'verification_status', 'verification_notes', 'created_at', 'view_count']);
 
             return response()->json([
+                'success' => true,
                 'message' => 'Volunteer articles retrieved successfully',
                 'data' => $articles
             ]);
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'message' => 'Failed to get volunteer articles: ' . $e->getMessage(),
             ], 500);
         }

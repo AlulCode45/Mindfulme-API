@@ -18,6 +18,10 @@ class Article extends Model
         'content',
         'featured_image',
         'author_id',
+        'author_name',
+        'author_email',
+        'author_phone',
+        'type',
         'category_id',
         'status',
         'verification_status',
@@ -166,12 +170,29 @@ class Article extends Model
 
     public function getAuthorNameAttribute()
     {
+        // For volunteer submissions, use the stored author_name
+        if ($this->type === 'volunteer_submission' && $this->attributes['author_name'] ?? null) {
+            return $this->attributes['author_name'];
+        }
+
+        // For internal articles, use the related user
         return $this->author ? $this->author->name : 'Unknown Author';
     }
 
     public function getAuthorPhotoAttribute()
     {
         return $this->author ? $this->author->profile_photo : null;
+    }
+
+    public function getAuthorEmailAttribute()
+    {
+        // For volunteer submissions, use the stored author_email
+        if ($this->type === 'volunteer_submission' && $this->attributes['author_email'] ?? null) {
+            return $this->attributes['author_email'];
+        }
+
+        // For internal articles, use the related user
+        return $this->author ? $this->author->email : null;
     }
 
     public function getAuthorBioAttribute()
