@@ -126,7 +126,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Admin Testimonial Management Routes
-    Route::prefix('admin/testimonials')->middleware(['role:superadmin'])->group(function () {
+    Route::prefix('admin/testimonials')->group(function () {
         Route::get('/', [AdminTestimonialController::class, 'index']);
         Route::put('/{testimonial}/approval', [AdminTestimonialController::class, 'updateApproval']);
         Route::get('/stats', [AdminTestimonialController::class, 'getStats']);
@@ -134,7 +134,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Admin User Management Routes
-    Route::prefix('admin/users')->middleware(['role:superadmin'])->group(function () {
+    Route::prefix('admin/users')->group(function () {
         Route::get('/', [UserManagementController::class, 'index']);
         Route::get('/stats', [UserManagementController::class, 'getStats']);
         Route::get('/roles', [UserManagementController::class, 'getRoles']);

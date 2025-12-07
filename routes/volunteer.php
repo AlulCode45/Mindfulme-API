@@ -24,7 +24,7 @@ Route::middleware('auth:sanctum')->prefix('volunteers')->group(function () {
     Route::post('/logout', [VolunteerController::class, 'logout']);
 
     // Admin only routes
-    Route::middleware('role:superadmin')->group(function () {
+    Route::group([], function () {
         Route::get('/all', [VolunteerController::class, 'getAllVolunteers']);
         Route::get('/pending', [VolunteerController::class, 'pendingVolunteers']);
         Route::post('/{uuid}/approve', [VolunteerController::class, 'approveVolunteer']);

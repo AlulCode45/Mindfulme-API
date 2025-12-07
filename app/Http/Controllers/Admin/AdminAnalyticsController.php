@@ -17,7 +17,6 @@ class AdminAnalyticsController extends Controller
     public function __construct()
     {
         $this->middleware('auth:sanctum');
-        $this->middleware('role:superadmin');
     }
 
     /**
@@ -26,14 +25,23 @@ class AdminAnalyticsController extends Controller
     public function getDashboardStats(): JsonResponse
     {
         try {
+            // Check if user is admin
+            if (auth()->user()->role !== 'superadmin') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized. Admin access required.',
+                ], 403);
+            }
+
             // Calculate stats
             $totalUsers = User::count();
-            $totalPsychologists = User::role('psychologist')->count();
+            $totalVolunteers = User::where('role', 'volunteer')->count();
+            $regularUsers = User::where('role', 'user')->count();
             $activeComplaints = Complaints::whereIn('status', ['new', 'in-progress'])->count();
             $totalSessions = Appointments::count();
             $completedSessions = Appointments::where('status', 'completed')->count();
-            $totalReviews = Review::verified()->count();
-            $averageRating = Review::verified()->avg('rating') ?? 0;
+            $totalReviews = Review::where('verified', true)->count();
+            $averageRating = Review::where('verified', true)->avg('rating') ?? 0;
 
             // Calculate growth rates (compared to previous month)
             $lastMonthStart = now()->subMonth()->startOfMonth();
@@ -55,8 +63,8 @@ class AdminAnalyticsController extends Controller
             $stats = [
                 'users' => [
                     'total' => $totalUsers,
-                    'psychologists' => $totalPsychologists,
-                    'regular_users' => $totalUsers - $totalPsychologists,
+                    'volunteers' => $totalVolunteers,
+                    'regular_users' => $regularUsers,
                     'growth_rate' => round($userGrowth, 1)
                 ],
                 'sessions' => [
