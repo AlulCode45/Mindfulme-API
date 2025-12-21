@@ -40,8 +40,8 @@ class AdminAnalyticsController extends Controller
             $activeComplaints = Complaints::whereIn('status', ['new', 'in-progress'])->count();
             $totalSessions = Appointments::count();
             $completedSessions = Appointments::where('status', 'completed')->count();
-            $totalReviews = Review::where('verified', true)->count();
-            $averageRating = Review::where('verified', true)->avg('rating') ?? 0;
+            $totalReviews = Review::verified()->count();
+            $averageRating = Review::verified()->avg('rating') ?? 0;
 
             // Calculate growth rates (compared to previous month)
             $lastMonthStart = now()->subMonth()->startOfMonth();
