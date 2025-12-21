@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Complaints extends Model
 {
-    /** @use HasFactory<\Database\Factories\ComplaintsFactory> */
     use HasUuids, HasFactory;
 
     public $incrementing = false;
@@ -37,6 +36,12 @@ class Complaints extends Model
     public function evidence(): HasMany
     {
         return $this->hasMany(Evidence::class, 'complaint_id', 'complaint_id');
+    }
+
+    public function chats(): HasMany
+    {
+        return $this->hasMany(Chat::class, 'complaint_id', 'complaint_id')
+            ->orderBy('created_at', 'desc');
     }
 
     protected static function booted(): void

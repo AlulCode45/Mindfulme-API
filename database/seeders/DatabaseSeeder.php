@@ -18,19 +18,22 @@ class DatabaseSeeder extends Seeder
 
         // Seed all data
         $this->call([
-            // Users and basic data
+                // Users and basic data
             UsersSeeder::class,
 
-            // News and content
+                // News and content
             NewsCategorySeeder::class,
             ArticlesSeeder::class,
             SimpleArticleSeeder::class,
 
-            // Session and appointment data
+                // Session and appointment data
             SessionTypesSeeder::class,
 
-            // Testimonials and reviews
+                // Testimonials and reviews
             TestimonialsSeeder::class,
+
+                // Complaints with chat
+            ComplaintsSeeder::class,
         ]);
 
         echo "Database seeding completed!\n";
