@@ -56,24 +56,6 @@ class ChatController extends Controller
                     $unreadCount = $complaint->chats->where('sender_type', '!=', 'user')->where('is_read', false)->count();
                 }
 
-                // FIX: Add null check for sender
-                $lastMessageData = null;
-                if ($lastMessage) {
-                    $senderName = 'Unknown User';
-                    if ($lastMessage->sender) {
-                        $senderName = $lastMessage->sender->name;
-                    }
-
-                    $lastMessageData = [
-                        'id' => $lastMessage->id,
-                        'message_text' => $lastMessage->message_text,
-                        'message_type' => $lastMessage->message_type,
-                        'sender' => [
-                            'name' => $senderName
-                        ]
-                    ];
-                }
-
                 $chatRooms[] = [
                     'complaint_id' => $complaint->complaint_id,
                     'complaint' => [
@@ -87,7 +69,14 @@ class ChatController extends Controller
                             'avatar' => $complaint->user->avatar ?? null
                         ]
                     ],
-                    'last_message' => $lastMessageData,
+                    'last_message' => $lastMessage ? [
+                        'id' => $lastMessage->id,
+                        'message_text' => $lastMessage->message_text,
+                        'message_type' => $lastMessage->message_type,
+                        'sender' => [
+                            'name' => $lastMessage->sender->name
+                        ]
+                    ] : null,
                     'unread_count' => $unreadCount,
                     'updated_at' => $complaint->updated_at
                 ];
@@ -104,7 +93,6 @@ class ChatController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Chat rooms error: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
             return response()->json([
                 'success' => false,
                 'error' => 'Failed to fetch chat rooms'
@@ -116,6 +104,7 @@ class ChatController extends Controller
     {
         try {
             $complaint = Complaints::where('complaint_id', $complaint_id)->first();
+
             if (!$complaint) {
                 return response()->json([
                     'success' => false,
@@ -178,6 +167,7 @@ class ChatController extends Controller
 
         try {
             $complaint = Complaints::where('complaint_id', $request->complaint_id)->first();
+
             if (!$complaint) {
                 return response()->json([
                     'success' => false,
@@ -252,6 +242,7 @@ class ChatController extends Controller
 
         try {
             $complaint = Complaints::where('complaint_id', $request->complaint_id)->first();
+
             if (!$complaint) {
                 return response()->json([
                     'success' => false,
@@ -260,6 +251,7 @@ class ChatController extends Controller
             }
 
             $user = User::where('uuid', $request->user_id)->first();
+
             if (!$user) {
                 return response()->json([
                     'success' => false,
@@ -330,6 +322,7 @@ class ChatController extends Controller
     {
         try {
             $complaint = Complaints::where('complaint_id', $complaint_id)->first();
+
             if (!$complaint) {
                 return response()->json([
                     'success' => false,
@@ -403,3 +396,5 @@ class ChatController extends Controller
         }
     }
 }
+
+
