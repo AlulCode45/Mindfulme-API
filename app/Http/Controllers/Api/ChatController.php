@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Chat;
@@ -30,11 +30,14 @@ class ChatController extends Controller
             $userId = $request->user_id;
             $userType = $request->user_type;
 
-            $query = Complaints::with(['user', 'chats' => function($q) {
-                $q->with('sender')->orderBy('created_at', 'desc');
-            }])
-            ->whereNotNull('classification')
-            ->whereHas('chats');
+            $query = Complaints::with([
+                'user',
+                'chats' => function ($q) {
+                    $q->with('sender')->orderBy('created_at', 'desc');
+                }
+            ])
+                ->whereNotNull('classification')
+                ->whereHas('chats');
 
             if ($userType === 'user') {
                 $query->where('user_id', $userId);
@@ -79,7 +82,7 @@ class ChatController extends Controller
                 ];
             }
 
-            usort($chatRooms, function($a, $b) {
+            usort($chatRooms, function ($a, $b) {
                 return strtotime($b['updated_at']) - strtotime($a['updated_at']);
             });
 
@@ -101,7 +104,7 @@ class ChatController extends Controller
     {
         try {
             $complaint = Complaints::where('complaint_id', $complaint_id)->first();
-            
+
             if (!$complaint) {
                 return response()->json([
                     'success' => false,
@@ -137,7 +140,7 @@ class ChatController extends Controller
     public function sendMessage(Request $request)
     {
         $hasFile = $request->hasFile('file');
-        
+
         $rules = [
             'complaint_id' => 'required|string',
             'sender_id' => 'required|string',
@@ -145,7 +148,7 @@ class ChatController extends Controller
             'message_text' => $hasFile ? 'nullable|string|max:1000' : 'required|string|max:1000',
             'message_type' => 'required|in:text,image,file',
         ];
-        
+
         if ($hasFile) {
             $rules['file'] = 'required|file|max:5120|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xls,xlsx,txt';
         } else {
@@ -164,7 +167,7 @@ class ChatController extends Controller
 
         try {
             $complaint = Complaints::where('complaint_id', $request->complaint_id)->first();
-            
+
             if (!$complaint) {
                 return response()->json([
                     'success' => false,
@@ -181,7 +184,7 @@ class ChatController extends Controller
 
             $fileUrl = null;
             $fileName = null;
-            
+
             if ($hasFile) {
                 $file = $request->file('file');
                 $filename = 'chat_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
@@ -239,7 +242,7 @@ class ChatController extends Controller
 
         try {
             $complaint = Complaints::where('complaint_id', $request->complaint_id)->first();
-            
+
             if (!$complaint) {
                 return response()->json([
                     'success' => false,
@@ -248,7 +251,7 @@ class ChatController extends Controller
             }
 
             $user = User::where('uuid', $request->user_id)->first();
-            
+
             if (!$user) {
                 return response()->json([
                     'success' => false,
@@ -298,7 +301,7 @@ class ChatController extends Controller
             $filename = 'chat_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('chat/files', $filename, 'public');
             $url = Storage::disk('public')->url($path);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -319,7 +322,7 @@ class ChatController extends Controller
     {
         try {
             $complaint = Complaints::where('complaint_id', $complaint_id)->first();
-            
+
             if (!$complaint) {
                 return response()->json([
                     'success' => false,
@@ -328,7 +331,7 @@ class ChatController extends Controller
             }
 
             $enabled = !is_null($complaint->classification);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -363,7 +366,7 @@ class ChatController extends Controller
             $userType = $request->user_type;
 
             $query = Chat::where('is_read', false);
-            
+
             if ($userType === 'user') {
                 $query->where('sender_type', '!=', 'user');
             } else {
@@ -371,7 +374,7 @@ class ChatController extends Controller
             }
 
             if ($userType === 'user') {
-                $query->whereHas('complaint', function($q) use ($userId) {
+                $query->whereHas('complaint', function ($q) use ($userId) {
                     $q->where('user_id', $userId);
                 });
             }
