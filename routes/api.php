@@ -184,13 +184,13 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Chat Routes
     Route::prefix('chat')->group(function () {
-        Route::get('/rooms', [\App\Http\Controllers\API\ChatController::class, 'getRooms']);
-        Route::get('/messages/{complaint_id}', [\App\Http\Controllers\API\ChatController::class, 'getMessages']);
-        Route::post('/messages', [\App\Http\Controllers\API\ChatController::class, 'sendMessage']);
-        Route::post('/read', [\App\Http\Controllers\API\ChatController::class, 'markAsRead']);
-        Route::get('/check/{complaint_id}', [\App\Http\Controllers\API\ChatController::class, 'checkChatEnabled']);
-        Route::get('/unread', [\App\Http\Controllers\API\ChatController::class, 'getUnreadCount']);
-        Route::post('/upload', [\App\Http\Controllers\API\ChatController::class, 'uploadFile']);
+        Route::get('/rooms', [\App\Http\Controllers\Api\ChatController::class, 'getRooms']);
+        Route::get('/messages/{complaint_id}', [\App\Http\Controllers\Api\ChatController::class, 'getMessages']);
+        Route::post('/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage']);
+        Route::post('/read', [\App\Http\Controllers\Api\ChatController::class, 'markAsRead']);
+        Route::get('/check/{complaint_id}', [\App\Http\Controllers\Api\ChatController::class, 'checkChatEnabled']);
+        Route::get('/unread', [\App\Http\Controllers\Api\ChatController::class, 'getUnreadCount']);
+        Route::post('/upload', [\App\Http\Controllers\Api\ChatController::class, 'uploadFile']);
 
         // Legacy chat routes (for psychologist sessions)
         Route::get('/messages', [ChatController::class, 'getMessages']);
@@ -223,10 +223,10 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/midtrans/notification', [MidtransWebhookController::class, 'handle']);
 
 // Include test routes for debugging
-require __DIR__.'/test-chat.php';
+require __DIR__ . '/test-chat.php';
 
 // Include content management routes
-require __DIR__.'/content.php';
+require __DIR__ . '/content.php';
 
 // Include volunteer routes
-require __DIR__.'/volunteer.php';
+require __DIR__ . '/volunteer.php';
