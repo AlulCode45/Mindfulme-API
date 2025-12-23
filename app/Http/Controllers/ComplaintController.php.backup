@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Contracts\Interfaces\ComplaintInterface;
 use App\Helpers\ResponseHelper;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ComplaintController extends Controller
 {
@@ -45,77 +43,22 @@ class ComplaintController extends Controller
     public function storeComplaint(Request $request)
     {
         try {
-            // Validate request
-            $validated = $request->validate([
-                'title' => 'required|string|max:200',
-                'chronology' => 'required|string|max:2000',
-                'category' => 'required|string',
-                'description' => 'nullable|string|max:1000',
-                'chat_history' => 'nullable|string',
-                'evidence' => 'nullable|array',
-                'evidence.*' => 'file|mimes:jpeg,jpg,png,pdf,doc,docx|max:10240' // Max 10MB per file
-            ]);
-
-            $evidenceFiles = [];
-
-            // Handle file uploads
-            if ($request->hasFile('evidence')) {
-                foreach ($request->file('evidence') as $file) {
-                    // Generate unique filename
-                    $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-
-                    // Store file in storage/app/public/complaints/evidence
-                    $path = $file->storeAs('complaints/evidence', $filename, 'public');
-
-                    $evidenceFiles[] = [
-                        'filename' => $file->getClientOriginalName(),
-                        'path' => $path,
-                        'url' => asset('storage/' . $path),
-                        'mime_type' => $file->getMimeType(),
-                        'size' => $file->getSize()
-                    ];
-                }
-            }
-
             $data = [
                 'user_id' => auth()->user()->uuid,
-                'title' => $validated['title'],
-                'chronology' => $validated['chronology'],
-                'category' => $validated['category'],
-                'description' => $validated['description'] ?? null,
-                'chat_history' => $validated['chat_history'] ?? null,
-                'evidence_files' => !empty($evidenceFiles) ? json_encode($evidenceFiles) : null,
-                'status' => 'new',
-                'classification' => null
+                'title' => $request->title,
+                'chronology' => $request->chronology,
+                'category' => $request->category,
+                'chat_history' => $request->chat_history,
             ];
-
-            $complaint = $this->complaint->store($data);
-
-            return ResponseHelper::success($complaint, 'Complaint submitted successfully');
+            $this->complaint->store($data);
+            return ResponseHelper::success($data, 'Complaint submitted successfully');
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
     }
-
     public function destroy(string $uuid)
     {
         try {
-            // Get complaint first to delete associated files
-            $complaint = $this->complaint->show($uuid);
-
-            // Delete evidence files from storage if they exist
-            if ($complaint->evidence_files) {
-                $evidenceFiles = is_string($complaint->evidence_files)
-                    ? json_decode($complaint->evidence_files, true)
-                    : $complaint->evidence_files;
-
-                foreach ($evidenceFiles as $file) {
-                    if (isset($file['path']) && Storage::disk('public')->exists($file['path'])) {
-                        Storage::disk('public')->delete($file['path']);
-                    }
-                }
-            }
-
             $this->complaint->delete($uuid);
             return ResponseHelper::success([], 'Complaint deleted successfully');
         } catch (\Exception $e) {
@@ -260,35 +203,10 @@ class ComplaintController extends Controller
             $data['status'] = 'in-progress';
 
             $updatedComplaint = $this->complaint->update($data, $uuid);
-
             return ResponseHelper::success($updatedComplaint, 'Complaint classified successfully');
         } catch (\Exception $e) {
             return ResponseHelper::error($e->getMessage());
         }
     }
-
-    /**
-     * Get evidence files for a complaint
-     */
-    public function getEvidence(string $uuid)
-    {
-        try {
-            $complaint = $this->complaint->show($uuid);
-
-            if (!$complaint) {
-                return ResponseHelper::error('Complaint not found', 404);
-            }
-
-            $evidenceFiles = [];
-            if ($complaint->evidence_files) {
-                $evidenceFiles = is_string($complaint->evidence_files)
-                    ? json_decode($complaint->evidence_files, true)
-                    : $complaint->evidence_files;
-            }
-
-            return ResponseHelper::success($evidenceFiles ?? [], 'Evidence files retrieved successfully');
-        } catch (\Exception $e) {
-            return ResponseHelper::error($e->getMessage());
-        }
-    }
 }
+
