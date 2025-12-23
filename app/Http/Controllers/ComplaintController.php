@@ -251,7 +251,9 @@ class ComplaintController extends Controller
                 'admin_notes' => 'required|string|max:1000',
                 'scheduled_date' => 'sometimes|date',
                 'scheduled_time' => 'sometimes|string',
-                'assigned_to' => 'sometimes|string|max:255'
+                'assigned_to' => 'sometimes|string|max:255',
+                'meeting_link' => 'sometimes|string|max:500',
+                'notification_message' => 'sometimes|string'
             ]);
 
             $complaint = $this->complaint->show($uuid);
@@ -292,3 +294,4 @@ class ComplaintController extends Controller
         }
     }
 }
+
