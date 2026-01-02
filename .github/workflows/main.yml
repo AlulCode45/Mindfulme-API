@@ -3,10 +3,10 @@ name: 🚀 Laravel CI/CD Deployment
 # Jalankan workflow saat:
 on:
   push:
-    branches: [ main ]      # Saat push ke main
+    branches: [main] # Saat push ke main
   pull_request:
-    branches: [ main ]      # Saat PR ke main
-  workflow_dispatch:        # Bisa dijalankan manual dari GitHub UI
+    branches: [main] # Saat PR ke main
+  workflow_dispatch: # Bisa dijalankan manual dari GitHub UI
 
 jobs:
   web-deploy:
@@ -20,11 +20,12 @@ jobs:
       - name: 📦 Deploying via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.FTP_SERVER }}         # FTP host (disimpan di Secrets)
-          username: ${{ secrets.FTP_USERNAME }}     # FTP user
-          password: ${{ secrets.FTP_PASSWORD }}     # FTP password
-          protocol: ftp                             # Bisa diganti ke ftps atau sftp jika perlu
-          exclude: |                                # File & folder yang tidak diupload
+          server: ${{ secrets.FTP_SERVER }} # FTP host (disimpan di Secrets)
+          username: ${{ secrets.FTP_USERNAME }} # FTP user
+          password: ${{ secrets.FTP_PASSWORD }} # FTP password
+          port: 21
+          protocol: ftp # Bisa diganti ke ftps atau sftp jika perlu
+          exclude: | # File & folder yang tidak diupload
             **/.git*
             **/.git*/**
             **/node_modules/**
