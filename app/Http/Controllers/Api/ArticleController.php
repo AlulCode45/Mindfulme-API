@@ -183,6 +183,11 @@ class ArticleController extends Controller
         // Generate UUID for the article
         $validated['id'] = Str::uuid()->toString();
 
+        // Set verification status to 'approved' for admin-created articles
+        // Only volunteer submissions need verification
+        $validated['verification_status'] = 'approved';
+        $validated['type'] = 'admin_created';
+
         $article = Article::create($validated);
 
         // Attach tags
@@ -367,17 +372,17 @@ class ArticleController extends Controller
 
         try {
             // Generate unique slug
-          $slug = Str::slug($validated['title']);
-          $originalSlug = $slug;
-          $counter = 1;
+            $slug = Str::slug($validated['title']);
+            $originalSlug = $slug;
+            $counter = 1;
 
-          // Ensure slug is unique
-          while (Article::where('slug', $slug)->exists()) {
-              $slug = $originalSlug . '-' . $counter;
-              $counter++;
-          }
+            // Ensure slug is unique
+            while (Article::where('slug', $slug)->exists()) {
+                $slug = $originalSlug . '-' . $counter;
+                $counter++;
+            }
 
-          $articleData = [
+            $articleData = [
                 'id' => Str::uuid()->toString(),
                 'title' => $validated['title'],
                 'slug' => $slug,
@@ -424,6 +429,7 @@ class ArticleController extends Controller
     public function pendingVerification(Request $request)
     {
         $query = Article::with(['author', 'category'])
+            ->where('type', 'volunteer_submission')
             ->pending()
             ->orderBy('created_at', 'desc');
 
