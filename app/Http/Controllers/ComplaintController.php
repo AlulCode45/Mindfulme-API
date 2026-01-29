@@ -248,7 +248,7 @@ class ComplaintController extends Controller
         try {
             $data = $request->validate([
                 'classification' => 'required|in:psikologi,hukum',
-                'admin_notes' => 'required|string|max:1000',
+                'admin_notes' => 'nullable|string|max:1000',
                 'scheduled_date' => 'sometimes|date',
                 'scheduled_time' => 'sometimes|string',
                 'assigned_to' => 'sometimes|string|max:255',
