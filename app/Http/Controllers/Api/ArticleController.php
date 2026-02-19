@@ -146,6 +146,7 @@ class ArticleController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
             'excerpt' => 'required|string|max:500',
             'content' => 'required|string',
             'category_id' => 'required|string|exists:content_categories,id',
@@ -167,16 +168,9 @@ class ArticleController extends Controller
             $validated['featured_image'] = $imagePath;
         }
 
-        // Generate slug if not provided
-        if (empty($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['title']);
-        } else {
-            // Ensure slug is unique
-            $validated['slug'] = Str::slug($validated['slug']);
-            while (Article::where('slug', $validated['slug'])->exists()) {
-                $validated['slug'] .= '-' . time();
-            }
-        }
+        // Generate unique slug
+        $slugSource = $validated['slug'] ?? $validated['title'];
+        $validated['slug'] = Article::generateUniqueSlug($slugSource);
 
         $validated['author_id'] = auth()->id();
 
@@ -222,6 +216,7 @@ class ArticleController extends Controller
 
         $validated = $request->validate([
             'title' => 'sometimes|string|max:255',
+            'slug' => 'sometimes|nullable|string|max:255',
             'excerpt' => 'sometimes|string|max:500',
             'content' => 'sometimes|string',
             'category_id' => 'sometimes|string|exists:content_categories,id',
@@ -250,17 +245,9 @@ class ArticleController extends Controller
 
         // Generate slug if title changed and slug not provided
         if (isset($validated['title']) && !isset($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['title']);
-            // Ensure slug is unique
-            while (Article::where('slug', $validated['slug'])->where('id', '!=', $article->id)->exists()) {
-                $validated['slug'] .= '-' . time();
-            }
+            $validated['slug'] = Article::generateUniqueSlug($validated['title'], $article->id);
         } elseif (isset($validated['slug'])) {
-            $validated['slug'] = Str::slug($validated['slug']);
-            // Ensure slug is unique
-            while (Article::where('slug', $validated['slug'])->where('id', '!=', $article->id)->exists()) {
-                $validated['slug'] .= '-' . time();
-            }
+            $validated['slug'] = Article::generateUniqueSlug($validated['slug'], $article->id);
         }
 
         $article->update($validated);
@@ -372,15 +359,7 @@ class ArticleController extends Controller
 
         try {
             // Generate unique slug
-            $slug = Str::slug($validated['title']);
-            $originalSlug = $slug;
-            $counter = 1;
-
-            // Ensure slug is unique
-            while (Article::where('slug', $slug)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
-                $counter++;
-            }
+            $slug = Article::generateUniqueSlug($validated['title']);
 
             $articleData = [
                 'id' => Str::uuid()->toString(),

@@ -58,16 +58,39 @@ class Article extends Model
         parent::boot();
 
         static::creating(function ($article) {
-            if (empty($article->slug)) {
-                $article->slug = Str::slug($article->title);
-            }
+            $source = $article->slug ?: $article->title;
+            $article->slug = self::generateUniqueSlug($source);
         });
 
         static::updating(function ($article) {
-            if ($article->isDirty('title') && empty($article->slug)) {
-                $article->slug = Str::slug($article->title);
+            if ($article->isDirty('title') || $article->isDirty('slug')) {
+                $source = $article->slug ?: $article->title;
+                $article->slug = self::generateUniqueSlug($source, $article->id);
             }
         });
+    }
+
+    public static function generateUniqueSlug(string $source, ?string $ignoreId = null): string
+    {
+        $baseSlug = Str::slug($source);
+        if (empty($baseSlug)) {
+            $baseSlug = 'article';
+        }
+
+        $slug = $baseSlug;
+        $counter = 1;
+
+        while (
+            self::query()
+                ->where('slug', $slug)
+                ->when($ignoreId, fn($query) => $query->where('id', '!=', $ignoreId))
+                ->exists()
+        ) {
+            $slug = $baseSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
     }
 
     // Relationships
@@ -95,8 +118,8 @@ class Article extends Model
     public function scopePublished($query)
     {
         return $query->where('status', 'published')
-                    ->whereNotNull('published_at')
-                    ->where('published_at', '<=', now());
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
     }
 
     public function scopeDraft($query)
@@ -142,8 +165,8 @@ class Article extends Model
     {
         return $query->where(function ($q) use ($term) {
             $q->where('title', 'LIKE', "%{$term}%")
-              ->orWhere('excerpt', 'LIKE', "%{$term}%")
-              ->orWhere('content', 'LIKE', "%{$term}%");
+                ->orWhere('excerpt', 'LIKE', "%{$term}%")
+                ->orWhere('content', 'LIKE', "%{$term}%");
         });
     }
 
@@ -213,7 +236,7 @@ class Article extends Model
 
     public function getStatusLabel()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'draft' => 'Draft',
             'published' => 'Published',
             'archived' => 'Archived',
