@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Testimonials;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 
 class TestimonialController extends Controller
 {
@@ -67,7 +66,9 @@ class TestimonialController extends Controller
             $mediaType = str_starts_with($mime, 'video/') ? 'video' : 'image';
             $filename = 'testimonials/' . uniqid('media_') . '.' . $file->getClientOriginalExtension();
             $file->storeAs('public', $filename);
-            $mediaUrl = Storage::disk('public')->url($filename);
+            // Build absolute URL explicitly using APP_URL
+            $appUrl = rtrim(config('app.url'), '/');
+            $mediaUrl = $appUrl . '/storage/' . $filename;
         }
 
         $testimonial = Testimonials::create([
@@ -124,9 +125,23 @@ class TestimonialController extends Controller
             'title' => 'string|max:255',
             'content' => 'string|max:1000',
             'anonymous' => 'boolean',
+            'media' => 'nullable|file|max:51200|mimes:jpeg,png,jpg,gif,webp,mp4,mov,avi,mkv,webm',
         ]);
 
-        $testimonial->update($request->all());
+        $data = $request->only(['rating', 'title', 'content', 'anonymous']);
+
+        // Handle new media upload
+        if ($request->hasFile('media')) {
+            $file = $request->file('media');
+            $mime = $file->getMimeType();
+            $data['media_type'] = str_starts_with($mime, 'video/') ? 'video' : 'image';
+            $filename = 'testimonials/' . uniqid('media_') . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('public', $filename);
+            $appUrl = rtrim(config('app.url'), '/');
+            $data['media_url'] = $appUrl . '/storage/' . $filename;
+        }
+
+        $testimonial->update($data);
 
         return response()->json([
             'data' => $testimonial,
