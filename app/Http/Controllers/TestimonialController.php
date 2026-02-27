@@ -64,11 +64,11 @@ class TestimonialController extends Controller
             $file = $request->file('media');
             $mime = $file->getMimeType();
             $mediaType = str_starts_with($mime, 'video/') ? 'video' : 'image';
-            $filename = 'testimonials/' . uniqid('media_') . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public', $filename);
-            // Build absolute URL explicitly using APP_URL
+            $basename = uniqid('media_') . '.' . $file->getClientOriginalExtension();
+            // storeAs(path, filename, disk) — stores to storage/app/public/testimonials/
+            $file->storeAs('testimonials', $basename, 'public');
             $appUrl = rtrim(config('app.url'), '/');
-            $mediaUrl = $appUrl . '/storage/' . $filename;
+            $mediaUrl = $appUrl . '/storage/testimonials/' . $basename;
         }
 
         $testimonial = Testimonials::create([
@@ -135,10 +135,11 @@ class TestimonialController extends Controller
             $file = $request->file('media');
             $mime = $file->getMimeType();
             $data['media_type'] = str_starts_with($mime, 'video/') ? 'video' : 'image';
-            $filename = 'testimonials/' . uniqid('media_') . '.' . $file->getClientOriginalExtension();
-            $file->storeAs('public', $filename);
+            $basename = uniqid('media_') . '.' . $file->getClientOriginalExtension();
+            // storeAs(path, filename, disk) — stores to storage/app/public/testimonials/
+            $file->storeAs('testimonials', $basename, 'public');
             $appUrl = rtrim(config('app.url'), '/');
-            $data['media_url'] = $appUrl . '/storage/' . $filename;
+            $data['media_url'] = $appUrl . '/storage/testimonials/' . $basename;
         }
 
         $testimonial->update($data);
