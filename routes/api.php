@@ -132,6 +132,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin/testimonials')->group(function () {
         Route::get('/', [AdminTestimonialController::class, 'index']);
         Route::put('/{testimonial}/approval', [AdminTestimonialController::class, 'updateApproval']);
+        Route::put('/{testimonial}', [AdminTestimonialController::class, 'update']);
+        Route::post('/{testimonial}', [AdminTestimonialController::class, 'update']); // POST alias
         Route::get('/stats', [AdminTestimonialController::class, 'getStats']);
         Route::delete('/{testimonial}', [AdminTestimonialController::class, 'destroy']);
     });

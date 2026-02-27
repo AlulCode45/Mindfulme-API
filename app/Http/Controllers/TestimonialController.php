@@ -107,9 +107,15 @@ class TestimonialController extends Controller
     public function update(Request $request, Testimonials $testimonial)
     {
         $user = Auth::user();
-        $isAdmin = $user && ($user->hasRole('superadmin') || $user->hasRole('admin'));
 
-        if (!$isAdmin && $testimonial->user_id !== $user?->uuid) {
+        // Allow if admin (check both Spatie roles and direct role column)
+        $isAdmin = $user && (
+            $user->hasRole('superadmin') ||
+            $user->hasRole('admin') ||
+            in_array($user->role ?? '', ['superadmin', 'admin'])
+        );
+
+        if (!$isAdmin && $testimonial->user_id !== ($user?->uuid ?? $user?->id)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -134,9 +140,15 @@ class TestimonialController extends Controller
     public function destroy(Testimonials $testimonial)
     {
         $user = Auth::user();
-        $isAdmin = $user && ($user->hasRole('superadmin') || $user->hasRole('admin'));
 
-        if (!$isAdmin && $testimonial->user_id !== $user?->uuid) {
+        // Allow if admin (check both Spatie roles and direct role column)
+        $isAdmin = $user && (
+            $user->hasRole('superadmin') ||
+            $user->hasRole('admin') ||
+            in_array($user->role ?? '', ['superadmin', 'admin'])
+        );
+
+        if (!$isAdmin && $testimonial->user_id !== ($user?->uuid ?? $user?->id)) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

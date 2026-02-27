@@ -50,6 +50,27 @@ class AdminTestimonialController extends Controller
     }
 
     /**
+     * Update testimonial content (admin can edit any testimonial).
+     */
+    public function update(Request $request, Testimonials $testimonial)
+    {
+        $request->validate([
+            'rating' => 'integer|min:1|max:5',
+            'title' => 'string|max:255',
+            'content' => 'string|max:1000',
+            'anonymous' => 'boolean',
+            'approval_status' => 'in:approved,rejected,pending',
+        ]);
+
+        $testimonial->update($request->only(['rating', 'title', 'content', 'anonymous', 'approval_status']));
+
+        return response()->json([
+            'data' => $testimonial->fresh(),
+            'message' => 'Testimonial updated successfully'
+        ]);
+    }
+
+    /**
      * Get testimonials statistics.
      */
     public function getStats()
