@@ -45,6 +45,9 @@ Route::prefix('session-types')->group(function () {
     Route::get('/consultation-type/{type}', [SessionTypeController::class, 'getByConsultationType']);
 });
 
+// Public testimonials route (no auth) - for landing page
+Route::get('/testimonials/approved', [TestimonialController::class, 'getApproved']);
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/midtrans/snap', [PaymentController::class, 'createSnapToken']);
 
