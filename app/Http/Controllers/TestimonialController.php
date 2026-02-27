@@ -106,7 +106,10 @@ class TestimonialController extends Controller
      */
     public function update(Request $request, Testimonials $testimonial)
     {
-        if ($testimonial->user_id !== Auth::id()) {
+        $user = Auth::user();
+        $isAdmin = $user && ($user->hasRole('superadmin') || $user->hasRole('admin'));
+
+        if (!$isAdmin && $testimonial->user_id !== $user?->uuid) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -130,7 +133,10 @@ class TestimonialController extends Controller
      */
     public function destroy(Testimonials $testimonial)
     {
-        if ($testimonial->user_id !== Auth::id()) {
+        $user = Auth::user();
+        $isAdmin = $user && ($user->hasRole('superadmin') || $user->hasRole('admin'));
+
+        if (!$isAdmin && $testimonial->user_id !== $user?->uuid) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

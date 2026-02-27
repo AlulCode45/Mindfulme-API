@@ -182,6 +182,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/user', [TestimonialController::class, 'userTestimonials']);
         Route::get('/{testimonial}', [TestimonialController::class, 'show']);
         Route::put('/{testimonial}', [TestimonialController::class, 'update']);
+        Route::post('/{testimonial}', [TestimonialController::class, 'update']); // POST alias for update (method spoofing)
         Route::delete('/{testimonial}', [TestimonialController::class, 'destroy']);
     });
 
